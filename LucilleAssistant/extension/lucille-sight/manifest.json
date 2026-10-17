@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Lucille Sight",
+  "version": "1.0.0",
+  "description": "Lucille reads the page you are on, only when you press her button (Alt+L), tells you what it means, and highlights what you are looking for.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "http://127.0.0.1:8403/*",
+    "http://localhost:8403/*",
+    "http://100.82.1.19:8403/*",
+    "https://duckduckgo.com/*",
+    "https://www.google.com/search*"
+  ],
+  "background": { "service_worker": "background.js", "scripts": ["background.js"] },
+  "action": { "default_title": "Ask Lucille about this page (Alt+L)" },
+  "commands": { "_execute_action": { "suggested_key": { "default": "Alt+L" }, "description": "Ask Lucille about this page" } },
+  "browser_specific_settings": { "gecko": { "id": "lucille-sight@i30ltz.local", "strict_min_version": "128.0" } }
+}

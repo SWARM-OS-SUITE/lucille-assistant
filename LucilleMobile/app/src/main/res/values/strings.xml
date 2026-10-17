@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Lucille Mobile</string>
+    <string name="notif_channel_name">Lucille Mobile</string>
+    <string name="notif_title">Lucille is running</string>
+    <string name="notif_text_running">Listening on %1$s</string>
+    <string name="notif_text_starting">Starting…</string>
+</resources>

@@ -1,0 +1,1435 @@
+<title>Lucille — SWARM OS</title>
+<meta name="theme-color" content="#070908">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Chakra+Petch:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   LUCILLE — SWARM OS Companion  v1.2.0 · 2026-09-26
+   black × orange × green · full desktop layout
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --void:#070908;
+  --void-2:#0d1210;
+  --plasma:#ff7a29;
+  --plasma-hi:#ffa35c;
+  --arc:#39d98a;
+  --ember:#ff4433;
+  --filament:#eef1ee;
+  --smoke:#9aa39c;
+  --smoke-dim:#4a524d;
+  --ok:#4ade80;
+  --warn:#ffc04d;
+  --crit:#ff4433;
+  --panel-fill:rgba(6,10,8,.84);
+  --panel-border:rgba(255,122,41,.26);
+  --edge:linear-gradient(135deg,rgba(255,122,41,.68),rgba(57,217,138,.28) 45%,rgba(10,46,24,.42));
+  --display:"Cinzel",Georgia,serif;
+  --body:"Chakra Petch",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --cut:10px;
+  --sidebar-w:82px;
+  --chat-w:310px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--void);color:var(--filament)}
+body{font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;
+     display:flex;flex-direction:column}
+button,input,select{font:inherit;color:inherit;border:none;background:none}
+a{color:var(--plasma-hi)}
+:focus-visible{outline:2px solid var(--arc);outline-offset:2px}
+
+/* ── background scene ─────────────────────────────────────────────── */
+.scene{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:url('assets/lucillebackground.png') center/cover no-repeat var(--void);
+}
+.scene::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,
+    rgba(6,10,8,.58) 0%,rgba(6,10,8,.72) 50%,rgba(6,10,8,.94) 100%);
+}
+#blossoms{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+/* ── topbar ───────────────────────────────────────────────────────── */
+.topbar{
+  position:relative;z-index:5;flex-shrink:0;
+  height:62px;display:flex;align-items:center;gap:14px;padding:0 18px 0 0;
+  border-bottom:1px solid var(--panel-border);
+  background:rgba(6,9,7,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+/* sidebar-width spacer so topbar content aligns with shell */
+.topbar-logo{
+  display:flex;flex-direction:column;justify-content:center;
+  width:var(--sidebar-w);flex-shrink:0;padding:0 12px;border-right:1px solid var(--panel-border);height:100%;
+}
+.logo-name{
+  font:800 22px/1 var(--display);letter-spacing:.2em;
+  background:linear-gradient(180deg,#fff 0%,var(--plasma-hi) 55%,var(--plasma) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 26px rgba(255,122,41,.5);
+}
+.logo-sub{font:500 8px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--smoke-dim);margin-top:4px}
+.topbar-center{flex:1;display:flex;align-items:center;gap:14px;min-width:0}
+#today{font:500 11px/1 var(--mono);letter-spacing:.05em;color:var(--smoke);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn{
+  border:1px solid var(--panel-border);background:rgba(255,255,255,.06);
+  padding:5px 10px;font:600 9px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;
+  clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+  transition:background .15s;
+}
+.conn:hover{background:rgba(255,122,41,.2)}
+.conn i{width:6px;height:6px;border-radius:50%;background:var(--warn);box-shadow:0 0 7px var(--warn)}
+.conn.live i{background:var(--ok);box-shadow:0 0 7px var(--ok)}
+/* avatar card */
+.avatar-card{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.avatar-img{width:38px;height:38px;border-radius:50%;object-fit:cover;
+            box-shadow:0 0 0 2px rgba(255,122,41,.55),0 0 14px rgba(255,122,41,.3)}
+.a-info{line-height:1.25}
+.a-name{font:700 13px/1 var(--display);letter-spacing:.12em;
+        background:linear-gradient(90deg,#fff,var(--plasma-hi));
+        -webkit-background-clip:text;background-clip:text;color:transparent}
+.a-status{font:500 9px/1.4 var(--mono);color:var(--ok);display:flex;align-items:center;gap:4px;margin-top:2px}
+.a-status .dot{width:5px;height:5px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.a-roles{font:400 9px/1.3 var(--mono);color:var(--smoke-dim);margin-top:1px}
+
+/* ── voice headline bar ───────────────────────────────────────────── */
+.voice-bar{
+  position:relative;z-index:4;flex-shrink:0;
+  display:flex;align-items:center;gap:10px;
+  padding:9px 18px 9px calc(var(--sidebar-w) + 18px);
+  background:rgba(6,11,8,.62);border-bottom:1px solid var(--panel-border);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.wave{width:48px;height:10px;flex-shrink:0}
+.wave path{stroke:var(--plasma-hi);stroke-width:1.5;fill:none}
+.who-tag{font:600 9px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--plasma-hi);flex-shrink:0}
+#headline{font:500 13px/1.4 var(--body);color:var(--filament);opacity:.9;text-wrap:pretty}
+
+/* ── shell (sidebar + content + chat) ────────────────────────────── */
+.shell{
+  flex:1;min-height:0;position:relative;z-index:2;
+  display:grid;
+  grid-template-columns:var(--sidebar-w) 1fr var(--chat-w);
+  overflow:hidden;
+}
+
+/* ── left sidebar nav ─────────────────────────────────────────────── */
+nav.tabs{
+  display:flex;flex-direction:column;align-items:stretch;padding:8px 0;gap:2px;
+  background:rgba(6,9,7,.8);
+  border-right:1px solid var(--panel-border);
+  overflow-y:auto;overflow-x:hidden;
+}
+.nav-brand{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:10px 8px 14px;margin-bottom:4px;
+  border-bottom:1px solid var(--panel-border);flex-shrink:0;
+}
+.nav-brand-img{width:34px;height:34px;border-radius:50%;object-fit:cover;
+               box-shadow:0 0 0 2px rgba(255,122,41,.5),0 0 10px rgba(255,122,41,.28)}
+.nav-brand-label{font:800 9px/1 var(--display);letter-spacing:.18em;
+                 background:linear-gradient(180deg,var(--plasma-hi),var(--plasma));
+                 -webkit-background-clip:text;background-clip:text;color:transparent}
+nav.tabs button{
+  width:100%;border:0;background:transparent;
+  padding:10px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  font:600 8px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;
+  color:var(--smoke-dim);cursor:pointer;transition:all .15s;
+  border-left:3px solid transparent;
+}
+nav.tabs button svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;transition:all .15s}
+nav.tabs button[aria-selected="true"]{
+  color:var(--plasma-hi);background:rgba(255,122,41,.13);border-left-color:var(--plasma);
+}
+nav.tabs button:hover:not([aria-selected="true"]){color:var(--filament);background:rgba(255,122,41,.07)}
+.nav-spacer{flex:1}
+
+/* ── center content ───────────────────────────────────────────────── */
+.content{
+  overflow-y:auto;overflow-x:hidden;
+  padding:14px 16px 18px;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,122,41,.3) transparent;
+}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:rgba(255,122,41,.3);border-radius:2px}
+
+/* ── right chat panel ─────────────────────────────────────────────── */
+.chatpanel{
+  display:flex;flex-direction:column;overflow:hidden;
+  border-left:1px solid var(--panel-border);
+  background:rgba(6,9,7,.85);
+}
+.chatpanel-head{
+  padding:10px 13px;border-bottom:1px solid var(--panel-border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.chatpanel-title{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--plasma-hi)}
+.online-pill{font:500 9px/1 var(--mono);color:var(--ok);display:flex;align-items:center;gap:4px}
+.online-pill i{width:5px;height:5px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok)}
+.chat-close-btn{
+  display:none;padding:3px 8px;border:1px solid var(--panel-border);cursor:pointer;
+  font:600 9px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--smoke);
+  transition:all .15s;
+}
+.chat-close-btn:hover{color:var(--filament);border-color:var(--smoke)}
+.chat-msgs{
+  flex:1;overflow-y:auto;padding:12px 13px;
+  display:flex;flex-direction:column;gap:9px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,122,41,.2) transparent;
+}
+.bubble{padding:9px 12px;font-size:13px;line-height:1.5;max-width:93%}
+.b-lucille{
+  background:rgba(255,122,41,.13);border-left:3px solid var(--plasma);
+  border-radius:0 7px 7px 0;align-self:flex-start;color:var(--filament);
+}
+.b-user{
+  background:rgba(57,217,138,.1);border-right:3px solid var(--arc);
+  border-radius:7px 0 0 7px;align-self:flex-end;color:var(--filament);text-align:right;
+}
+.chat-foot{
+  border-top:1px solid var(--panel-border);padding:9px 12px;
+  display:flex;flex-direction:column;gap:7px;flex-shrink:0;
+}
+.quick-chips{display:flex;flex-wrap:wrap;gap:4px}
+.qchip{
+  border:1px solid rgba(255,122,41,.28);background:rgba(255,122,41,.06);
+  padding:3px 8px;font:500 10px/1.3 var(--body);cursor:pointer;
+  border-radius:999px;color:var(--smoke);transition:all .15s;
+}
+.qchip:hover{background:rgba(255,122,41,.22);color:var(--filament);border-color:var(--plasma)}
+.chat-input-row{display:flex;gap:5px}
+.chat-input{
+  flex:1;background:rgba(255,255,255,.05);border:1px solid var(--panel-border);
+  padding:7px 9px;font-size:13px;color:var(--filament);outline:none;
+}
+.chat-input:focus{border-color:var(--plasma);box-shadow:0 0 0 2px rgba(255,122,41,.18)}
+.send-btn{
+  background:var(--plasma);padding:7px 11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+  transition:background .15s;flex-shrink:0;
+}
+.send-btn:hover{background:var(--plasma-hi)}
+.send-btn svg{stroke:#fff;fill:none;stroke-width:2;stroke-linejoin:round}
+
+/* ── bottom taskbar ───────────────────────────────────────────────── */
+.taskbar{
+  position:relative;z-index:5;flex-shrink:0;
+  background:rgba(6,9,7,.9);border-top:1px solid var(--panel-border);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.taskbar-apps{
+  display:flex;align-items:center;justify-content:center;gap:2px;
+  padding:5px 18px 2px;
+}
+.tapp{
+  padding:6px 12px;cursor:pointer;border-radius:3px;
+  font-size:9px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--smoke-dim);transition:all .15s;
+}
+.tapp svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6}
+.tapp:hover,.tapp.tact{color:var(--plasma-hi);background:rgba(255,122,41,.13)}
+.taskbar-info{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1px 18px 6px;gap:10px;
+}
+.quote-text{font:400 9px/1.3 var(--mono);color:var(--smoke-dim);font-style:italic;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{font:600 11px/1 var(--mono);color:var(--smoke);letter-spacing:.08em;flex-shrink:0}
+
+/* ── content panels ───────────────────────────────────────────────── */
+.panel{position:relative;padding:1px;background:var(--edge);
+       clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+.panel>.in{background:var(--panel-fill);clip-path:inherit;padding:13px 14px 14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+h2{font:600 11px/1 var(--display);letter-spacing:.18em;text-transform:uppercase;margin:0 0 11px;
+   color:var(--filament);display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+h2 small{font:500 9px/1 var(--mono);letter-spacing:.08em;color:var(--smoke-dim);text-transform:uppercase}
+.muted{color:var(--smoke)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.list{display:flex;flex-direction:column;gap:7px;margin:0;padding:0;list-style:none}
+.item{display:flex;gap:10px;align-items:flex-start}
+.item .t{flex:1;min-width:0}
+.item .t b{font-weight:600;display:block;overflow-wrap:anywhere;font-size:13px}
+.item .t span{font-size:12px;color:var(--smoke)}
+.kicker{font:600 9px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--smoke-dim)}
+hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,122,41,.4),transparent);margin:11px 0}
+.nudge{display:flex;gap:10px;padding:9px 11px;background:rgba(255,255,255,.03);border-left:3px solid var(--smoke-dim)}
+.nudge.warn{border-color:var(--warn)}
+.nudge.critical{border-color:var(--crit);background:rgba(255,68,51,.08)}
+.nudge.info{border-color:var(--arc)}
+.nudge .k{font:600 9px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;width:42px;flex:none;color:var(--smoke)}
+.nudge.critical .k{color:#ff8098}
+.nudge p{margin:0;font-size:13px}
+.btn{border:0;cursor:pointer;padding:7px 12px;font-weight:600;font-size:12px;
+     background:rgba(255,122,41,.16);color:var(--filament);
+     clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+     transition:background .15s,transform .1s}
+.btn:hover{background:rgba(255,122,41,.32)}
+.btn:active{transform:scale(.97)}
+.btn.hot{background:linear-gradient(135deg,var(--plasma),#004fc7);box-shadow:0 0 16px rgba(255,122,41,.45)}
+.btn.red{background:linear-gradient(135deg,var(--ember),#a3122f)}
+.btn.sm{padding:5px 8px;font-size:11px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{border:1px solid rgba(255,122,41,.34);background:transparent;padding:4px 8px;
+      font:500 11px/1.2 var(--body);cursor:pointer;border-radius:999px;color:var(--smoke)}
+.chip.on{background:rgba(255,122,41,.24);color:var(--filament);border-color:var(--plasma)}
+.chip.done{border-color:rgba(50,217,152,.5);color:var(--ok)}
+.meter{height:5px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+.meter>i{position:absolute;inset:0 auto 0 0;
+         background:linear-gradient(90deg,var(--arc),var(--plasma));box-shadow:0 0 8px var(--plasma)}
+.meter.hot>i{background:linear-gradient(90deg,var(--warn),var(--ember))}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar .lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;gap:8px}
+.bar .lbl span:last-child{font-family:var(--mono);color:var(--smoke);font-variant-numeric:tabular-nums}
+.vessel{display:grid;grid-template-columns:88px 1fr;gap:13px;align-items:center}
+.vessel svg{width:88px;height:88px}
+.big{font:600 26px/1 var(--mono);font-variant-numeric:tabular-nums}
+.deal{display:grid;grid-template-columns:58px 1fr auto;gap:9px;align-items:center;text-decoration:none;color:inherit}
+.deal img{width:58px;height:27px;object-fit:cover;background:#001230}
+.deal .ph{width:58px;height:27px;background:linear-gradient(135deg,#001440,#001a40)}
+.deal .price{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.deal .price b{display:block;color:var(--ok);font-size:13px}
+.deal .price s{font-size:10px;color:var(--smoke-dim)}
+.pct{font:600 9px/1 var(--mono);color:var(--void);background:var(--ok);padding:2px 4px;margin-left:4px;vertical-align:1px}
+.status{font:600 8px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:3px 5px;flex:none;margin-top:3px}
+.status.built{background:rgba(50,217,152,.15);color:var(--ok)}
+.status.next{background:rgba(57,217,138,.15);color:var(--arc)}
+.status.later{background:rgba(255,255,255,.07);color:var(--smoke)}
+.idea{padding:8px 0;border-top:1px solid rgba(255,122,41,.15)}
+.idea:first-child{border-top:0;padding-top:0}
+.idea b{font:600 14px/1.3 var(--body)}
+.idea p{margin:3px 0 5px;color:var(--smoke);font-size:12px}
+input.field,select.field{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,122,41,.28);padding:7px 9px;border-radius:0}
+input.field:focus,select.field:focus{border-color:var(--plasma);outline:none;box-shadow:0 0 0 2px rgba(255,122,41,.22)}
+textarea.field{width:100%;resize:vertical;background:rgba(255,255,255,.05);border:1px solid rgba(255,122,41,.28);padding:7px 9px;border-radius:0;font:12px/1.5 var(--mono);color:inherit}
+textarea.field:focus{border-color:var(--plasma);outline:none;box-shadow:0 0 0 2px rgba(255,122,41,.22)}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--smoke);flex:1}
+.brief{padding:9px 0;border-top:1px solid rgba(255,122,41,.15)}
+.brief:first-child{border-top:0;padding-top:0}
+.bhead{width:100%;text-align:left;cursor:pointer;padding:0}
+.bhead:focus-visible{outline:2px solid var(--plasma);outline-offset:3px}
+.status.live{background:rgba(50,217,152,.15);color:var(--ok)}
+.status.warn{background:rgba(255,184,0,.16);color:#ffb800}
+.status.bad{background:rgba(255,45,85,.14);color:var(--ember)}
+.bfeed{max-height:46vh;overflow:auto;font:12px/1.5 var(--mono);background:rgba(0,0,0,.28);padding:8px 10px;overflow-wrap:anywhere;white-space:pre-wrap}
+.bfeed .ts{opacity:.45}
+.bfeed .w-lucille{color:#f0abfc}.bfeed .w-boltz{color:#67e8f9}.bfeed .w-system{color:#fbbf24}.bfeed .w-you{color:#86efac}
+.bform{display:grid;gap:7px;margin-top:10px}
+.bform input,.bform textarea,.bform select{width:100%;box-sizing:border-box;background:rgba(0,0,0,.28);color:inherit;border:1px solid rgba(255,122,41,.34);padding:8px;font:inherit}
+.brief-body{margin:9px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.55 var(--mono);color:var(--smoke);max-height:60vh;overflow:auto}
+.timer{font:600 34px/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:.02em;text-shadow:0 0 16px rgba(255,122,41,.55)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* overlays */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(5,8,6,.78);display:flex;align-items:flex-end;justify-content:center}
+.sheet .panel{width:100%;max-width:540px}
+.sheet .panel>.in{max-height:92vh;overflow:auto}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:25;
+       background:#001230;border:1px solid var(--plasma);padding:7px 14px;font-size:12px;
+       box-shadow:0 0 18px rgba(255,122,41,.35);white-space:nowrap}
+/* chat FAB for mobile */
+.chat-fab{
+  position:fixed;bottom:72px;right:14px;z-index:10;
+  width:46px;height:46px;border-radius:50%;cursor:pointer;
+  background:linear-gradient(135deg,var(--plasma),#004fc7);
+  box-shadow:0 0 20px rgba(255,122,41,.5);
+  font-size:18px;display:none;align-items:center;justify-content:center;
+  transition:transform .15s;
+}
+.chat-fab:hover{transform:scale(1.08)}
+
+/* ── mobile (<= 900px) ────────────────────────────────────────────── */
+@media (max-width:900px){
+  :root{--sidebar-w:0px;--chat-w:0px}
+  .shell{grid-template-columns:1fr}
+  nav.tabs{
+    position:fixed;bottom:0;left:0;right:0;z-index:8;
+    flex-direction:row;align-items:stretch;height:auto;
+    width:auto;padding:0;gap:0;
+    background:rgba(6,9,7,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-right:none;border-top:1px solid var(--panel-border);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .nav-brand,.nav-spacer{display:none}
+  nav.tabs button{
+    flex:1;padding:8px 4px 6px;gap:3px;
+    border-left:none;border-top:3px solid transparent;font-size:7px;
+  }
+  nav.tabs button[aria-selected="true"]{border-left:none;border-top-color:var(--plasma)}
+  .chatpanel{display:none}
+  .taskbar{display:none}
+  .voice-bar{padding:8px 14px}
+  .content{padding:12px 12px calc(env(safe-area-inset-bottom) + 70px)}
+  .chat-fab{display:flex}
+  .topbar{padding:0 12px 0 0}
+  .topbar-logo{display:none}
+  .logo-sub,.a-roles{display:none}
+  .topbar-center{padding-left:12px}
+}
+/* chat panel as fullscreen overlay on mobile when open */
+.chatpanel.open{
+  display:flex;
+  position:fixed;inset:0;z-index:15;
+  background:rgba(6,9,7,.98);
+}
+.chat-close-btn{display:none}
+@media(max-width:900px){.chatpanel-head .chat-close-btn{display:block}}
+
+@media(prefers-reduced-motion:reduce){#blossoms{display:none}}
+</style>
+
+<!-- ── Background scene ─────────────────────────────────────────── -->
+<div class="scene" aria-hidden="true">
+  <canvas id="blossoms"></canvas>
+</div>
+
+<!-- ── Topbar ─────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-name">LUCILLE</div>
+    <div class="logo-sub">SWARM OS · 2026</div>
+  </div>
+  <div class="topbar-center">
+    <button class="conn" id="conn" type="button" aria-label="Connection settings">
+      <i></i><span>Example</span>
+    </button>
+    <div id="today">—</div>
+  </div>
+  <div class="avatar-card">
+    <img class="avatar-img" id="sigil" src="assets/lucille_sigil.jpg" alt="Lucille">
+    <div class="a-info">
+      <div class="a-name">Lucille</div>
+      <div class="a-status"><span class="dot"></span>Online · Here for You</div>
+      <div class="a-roles">Assistant · Companion · Daily Guide</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Voice / headline bar ───────────────────────────────────────── -->
+<div class="voice-bar" aria-live="polite">
+  <svg class="wave" viewBox="0 0 48 10"><path id="wavepath" d="M0 5 L48 5"/></svg>
+  <span class="who-tag">Lucille</span>
+  <p id="headline">Initialising SWARM…</p>
+</div>
+
+<!-- ── Shell: sidebar + content + chat ───────────────────────────── -->
+<div class="shell">
+
+  <!-- Left sidebar nav -->
+  <nav class="tabs" aria-label="Navigation sections">
+    <div class="nav-brand">
+      <img class="nav-brand-img" src="assets/lucille_sigil.jpg" alt="">
+      <div class="nav-brand-label">LLcy</div>
+    </div>
+    <button role="tab" data-tab="brief" aria-selected="true">
+      <svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Brief
+    </button>
+    <button role="tab" data-tab="care" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M12 3c3 4 6 7.5 6 11a6 6 0 01-12 0c0-3.5 3-7 6-11z"/></svg>Wellness
+    </button>
+    <button role="tab" data-tab="work" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>Code
+    </button>
+    <button role="tab" data-tab="games" aria-selected="false">
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v5M4.5 12.5h5M15.5 12h.01M18 14h.01"/></svg>Gaming
+    </button>
+    <button role="tab" data-tab="ideas" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M12 2l2.5 5.5L20 10l-5.5 2.5L12 18l-2.5-5.5L4 10l5.5-2.5z"/></svg>Ideas
+    </button>
+    <button role="tab" data-tab="briefs" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>Briefings
+    </button>
+    <button role="tab" data-tab="bridge" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M3 17V9a9 9 0 0118 0v8M1 17h5M18 17h5M9 17v-4M15 17v-4"/></svg>Bridge
+    </button>
+    <div class="nav-spacer"></div>
+    <button type="button" id="conn-sidebar" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </button>
+  </nav>
+
+  <!-- Center content -->
+  <main id="view" class="content"></main>
+
+  <!-- Right chat panel -->
+  <aside class="chatpanel" id="chatpanel">
+    <div class="chatpanel-head">
+      <div class="chatpanel-title">Chat with Lucille</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="online-pill"><i></i>Online</div>
+        <button class="chat-close-btn" id="chat-close" type="button">Close</button>
+      </div>
+    </div>
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="bubble b-lucille">
+        <p>Hey there 💕 I'm Lucille — your assistant, companion, and daily guide. I'm here for your day, your code, and anything on your mind.</p>
+      </div>
+    </div>
+    <div class="chat-foot">
+      <div class="quick-chips">
+        <button class="qchip" type="button" data-q="Talk">Talk</button>
+        <button class="qchip" type="button" data-q="I'm feeling…">I'm feeling…</button>
+        <button class="qchip" type="button" data-q="Help me with…">Help me with…</button>
+        <button class="qchip" type="button" data-q="Just chat">Just chat</button>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-in" type="text" placeholder="Message Lucille…" autocomplete="off">
+        <button class="send-btn" id="chat-send" type="button" aria-label="Send">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /.shell -->
+
+<!-- ── Bottom taskbar ─────────────────────────────────────────────── -->
+<footer class="taskbar">
+  <div class="taskbar-apps">
+    <button class="tapp tact" type="button" data-tab="brief" title="Brief">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>Home
+    </button>
+    <button class="tapp" type="button" data-tab="work" title="Files & Git">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Files
+    </button>
+    <button class="tapp" type="button" data-tab="games" title="News">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Globe
+    </button>
+    <button class="tapp" type="button" data-tab="work" title="Terminal / Sessions">
+      <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Terminal
+    </button>
+    <button class="tapp" type="button" data-tab="games" title="Games">
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v5M4.5 12.5h5M15.5 12h.01M18 14h.01"/></svg>Gaming
+    </button>
+    <button class="tapp" type="button" data-tab="brief" title="Calendar">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendar
+    </button>
+    <button class="tapp" type="button" id="chat-fab-tb" title="Chat">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chat
+    </button>
+    <button class="tapp" type="button" id="conn-tb" title="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </button>
+  </div>
+  <div class="taskbar-info">
+    <span class="quote-text" id="quote-text">"The quieter you become, the more you hear."</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</footer>
+
+<!-- Chat FAB (mobile only) -->
+<button class="chat-fab" id="chat-fab" type="button" aria-label="Open chat">💬</button>
+
+<div id="sheet-root"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   LUCILLE — SWARM OS Companion · v1.2.0 · 2026-09-26
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── cherry blossoms ─────────────────────────────────────────────── */
+(function blossoms(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.getElementById('blossoms'), ctx = cv.getContext('2d');
+  let W, H, dpr, petals = [], last = 0, spawnAcc = 0;
+  function resize(){
+    dpr = Math.min(devicePixelRatio || 1, 1.5);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize); resize();
+  function mkPetal(seedY){
+    const size = 4 + Math.random() * 9;
+    const orange = Math.random() < 0.72;
+    return {
+      x: Math.random() * W, y: seedY !== undefined ? seedY : -size - 20,
+      vx: (Math.random() - .5) * 1.3 - 0.3,
+      vy: 0.6 + Math.random() * 1.2,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - .5) * 0.05,
+      sway: Math.random() * Math.PI * 2,
+      swaySpd: 0.013 + Math.random() * 0.022,
+      size, alpha: 0.48 + Math.random() * 0.48,
+      r: orange ? 255 : 57, g: orange ? 122 : 217, b: orange ? 41 : 138
+    };
+  }
+  for (let i = 0; i < 60; i++) petals.push(mkPetal(Math.random() * H));
+  function frame(t){
+    const dt = Math.min(64, t - last); last = t;
+    ctx.clearRect(0, 0, W, H);
+    spawnAcc += dt;
+    if (spawnAcc > 190){ petals.push(mkPetal()); spawnAcc = 0; }
+    for (let i = petals.length - 1; i >= 0; i--){
+      const p = petals[i];
+      p.sway += p.swaySpd * dt / 16;
+      p.x += (p.vx + Math.sin(p.sway) * 0.55) * dt / 16;
+      p.y += p.vy * dt / 16;
+      p.rot += p.vrot * dt / 16;
+      if (p.y > H + 26){ petals.splice(i, 1); continue; }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+      const s = p.size;
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo( s*.72, -s*.52,  s*.82, s*.38, 0,  s);
+      ctx.bezierCurveTo(-s*.82,  s*.38, -s*.72, -s*.52, 0, -s);
+      const g = ctx.createRadialGradient(0, -s*.2, 0, 0, 0, s*1.15);
+      g.addColorStop(0,    `rgba(${p.r},${p.g},${p.b},0.96)`);
+      g.addColorStop(0.55, `rgba(${p.r},${p.g},${p.b},0.65)`);
+      g.addColorStop(1,    `rgba(${p.r},${p.g},${p.b},0.08)`);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.globalAlpha = p.alpha * 0.28;
+      ctx.fillStyle = 'rgba(238,241,238,0.9)';
+      ctx.beginPath();
+      ctx.ellipse(0, -s*.22, s*.22, s*.14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    /* wave animation in voice bar */
+    const wp = document.getElementById('wavepath');
+    if (wp){
+      let d = 'M0 5';
+      for (let x = 3; x <= 48; x += 3)
+        d += ` L${x} ${5 + Math.sin(t/140 + x*.5) * Math.sin(t/900 + x*.13) * 4}`;
+      wp.setAttribute('d', d);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ── clock + quotes ──────────────────────────────────────────────── */
+const QUOTES = [
+  '"The quieter you become, the more you hear."',
+  '"Build the life you deserve, one commit at a time."',
+  '"Rest is part of the build."',
+  '"Every session started is a win."',
+  '"Stay hydrated. Ship the thing."',
+  '"Small steps, every day."',
+  '"You\'re not behind. You\'re building."',
+  '"The code will wait. Drink some water."'
+];
+(function clockTick(){
+  const clk = document.getElementById('clock');
+  const qt = document.getElementById('quote-text');
+  let lastMin = -1, qIdx = Math.floor(Math.random() * QUOTES.length);
+  function tick(){
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes();
+    if (clk) clk.textContent = `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}  ${now.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}`;
+    if (m !== lastMin){ lastMin = m; if (qt && m % 10 === 0){ qIdx = (qIdx+1) % QUOTES.length; qt.textContent = QUOTES[qIdx]; } }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ── helpers ─────────────────────────────────────────────────────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = { get(k){ try{return localStorage.getItem(k)}catch{return null} }, set(k,v){ try{localStorage.setItem(k,v)}catch{} } };
+
+(function captureToken(){
+  const q = new URLSearchParams(location.search);
+  if (q.get('token')){ store.set('la.token', q.get('token')); history.replaceState(null,'',location.pathname); }
+})();
+
+const cfg = {
+  get base(){ return store.get('la.server') || (location.protocol.startsWith('http') && !/claude|artifact/.test(location.host) ? location.origin : ''); },
+  get token(){ return store.get('la.token') || ''; }
+};
+
+async function api(path, body, method){
+  if (!cfg.base) throw new Error('no server');
+  const r = await fetch(cfg.base + path, {
+    method: method || (body ? 'POST' : 'GET'),
+    headers: Object.assign({'Content-Type':'application/json'}, cfg.token ? {'X-Swarm-Auth': cfg.token} : {}),
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const j = await r.json();
+  if (r.status === 401) throw new Error(j.error || 'Wrong token');
+  return j;
+}
+
+/* ── example / demo data ─────────────────────────────────────────── */
+const now = new Date(), iso = (h,m=0) => { const d=new Date(now); d.setHours(h,m,0,0); return d.toISOString(); };
+const EXAMPLE = {
+  headline: "Morning. You're 650 ml behind on water. Lucy has 14 uncommitted changes, and /mnt/Lucy is 90% full. Most of your week went to LucyServer-go (11.5 h).",
+  nudges: [
+    {kind:'water',severity:'warn',text:"You're 650 ml behind on water. Grab a glass."},
+    {kind:'break',severity:'warn',text:"95 min straight on LucyServer-go. Stand up, stretch, drink water."},
+    {kind:'sleep',severity:'info',text:"Log last night's sleep so I can track it."}
+  ],
+  care: { day:{meds:[{name:'Morning meds',taken_at:iso(9,12)}], water_ml:750, meals:[{label:'Breakfast',at:iso(9,40)}], sleep:{hours:6.4}},
+          schedule:[{name:'Morning meds',at:'09:00'},{name:'Evening meds',at:'21:00'}], water_goal_ml:2500, sleep_goal_hours:7.5 },
+  sessions: { active:[{project:'LucyServer-go',kind:'project',start:new Date(Date.now()-95*60000).toISOString()}],
+    today_minutes:{'LucyServer-go':95,'SWARM OS ISO':40},
+    week_minutes:{'LucyServer-go':690,'SWARM OS ISO':410,'Companion app':260,'Lucille Assistant':75,'Cyberpunk 2077':540},
+    gaming_week_minutes:540 },
+  projects:['SWARM OS ISO','LucyServer-go','Companion app','Lucille Assistant','Recovery OS'],
+  git: [{path:'/mnt/swarmbuild',branch:'main',ahead:0,behind:0,dirty:4,untracked:2,last_commit:'auto-sync: 2026-10-07T23:00:00-04:00',last_when:'1 hour ago',changed:['30-source/LucilleAssistant/']},{path:'/mnt/Lucy',branch:'main',ahead:0,behind:0,dirty:9,untracked:5,last_commit:'auto-sync: 2026-10-07T22:00:00-04:00',last_when:'2 hours ago',changed:['SWARM_AI_FEATURES.md']}],
+  drives: [{mount:'/',mounted:true,used_gb:212,total_gb:500,used_pct:42},{mount:'/mnt/swarmbuild',mounted:true,used_gb:80,total_gb:295,used_pct:29},{mount:'/mnt/Lucy',mounted:true,used_gb:66,total_gb:250,used_pct:28},{mount:'/mnt/brains',mounted:true,used_gb:61,total_gb:250,used_pct:24},{mount:'/mnt/ventoy',mounted:true,used_gb:15,total_gb:128,used_pct:12},{mount:'/mnt/boltz',mounted:false,used_gb:0,total_gb:0,used_pct:0}],
+  mail: {connected:true, unread:{count:7}, inbox:{messages:[
+    {from:'GitHub',subject:'[swarm-os] auto-sync workflow succeeded'},
+    {from:'Steam',subject:'An item on your wishlist is on sale'},
+    {from:'NVIDIA Developer',subject:'NIM API usage summary for September'}]}},
+  calendar: {connected:true, events:[{summary:'Test SWARM ISO in QEMU',start:iso(14)},{summary:'Refill prescription',start:iso(17,30)}]},
+  gdrive: {connected:true, files:[{name:'SWARM OS roadmap',modifiedTime:iso(8)},{name:'Lucille voice lines',modifiedTime:iso(7)}]},
+  memory: [{kind:'decision',key:'shared-memory-architecture',ts:'2026-09-16T09:31:17Z',content:'Shared memory v1.0.0: append-only per-device logs at /mnt/brains/swarm-memory, cursor-based sync, Tailscale :5000 + token-only LAN :8402.'},
+           {kind:'decision',key:'desktop-direction',ts:'2026-09-11T12:00:00Z',content:'labwc floating compositor; Slint panel moves to backend-winit; no Electron shell.'}],
+  news: [
+    {source:'Arch Linux',tag:'arch',title:'Manual intervention for linux-firmware split packages',link:'https://archlinux.org/news/',when:iso(6)},
+    {source:'GamingOnLinux',tag:'gaming',title:'Proton Experimental adds fixes for several recent releases',link:'https://www.gamingonlinux.com/',when:iso(5)},
+    {source:'CachyOS',tag:'distro',title:'CachyOS September release: new kernel scheduler options',link:'https://cachyos.org/',when:iso(4)},
+    {source:'Phoronix',tag:'linux',title:'Mesa point release brings RADV and ANV performance fixes',link:'https://www.phoronix.com/',when:iso(3)},
+    {source:'DistroWatch',tag:'distro',title:'Distribution release: EndeavourOS refresh',link:'https://distrowatch.com/',when:iso(2)},
+    {source:'Steam News',tag:'gaming',title:'Steam Deck client update improves shader pre-caching',link:'https://store.steampowered.com/news/',when:iso(1)}],
+  deals: {
+    steam:[{title:'Hades',store:'Steam',sale_price:'6.24',normal_price:'24.99',savings_pct:75,steam_rating_pct:'98',url:'https://www.cheapshark.com/'},
+           {title:'Deep Rock Galactic',store:'Steam',sale_price:'7.49',normal_price:'29.99',savings_pct:75,steam_rating_pct:'97',url:'https://www.cheapshark.com/'},
+           {title:'Hollow Knight',store:'Steam',sale_price:'7.49',normal_price:'14.99',savings_pct:50,steam_rating_pct:'97',url:'https://www.cheapshark.com/'}],
+    keys:[{title:'Cyberpunk 2077',store:'GreenManGaming',sale_price:'23.99',normal_price:'59.99',savings_pct:60,steam_rating_pct:'82',url:'https://www.cheapshark.com/'},
+          {title:"Baldur's Gate 3",store:'Fanatical',sale_price:'47.99',normal_price:'59.99',savings_pct:20,steam_rating_pct:'96',url:'https://www.cheapshark.com/'},
+          {title:'Satisfactory',store:'Gamesplanet',sale_price:'26.99',normal_price:'39.99',savings_pct:33,steam_rating_pct:'96',url:'https://www.cheapshark.com/'}]},
+  gaming: {steam_recent:[{name:'Cyberpunk 2077',hours_2weeks:14.2},{name:'Deep Rock Galactic',hours_2weeks:5.5},{name:'Balatro',hours_2weeks:2.1}], steam_hours_2weeks:21.8, logged_week_hours:9},
+  ideas: [
+    {title:'Hex launcher heatmap',pitch:'Tint each hex icon on the SWARM desktop by how many hours you spent in that app this week.',stack:'Flutter + /api/sessions',size:'weekend'},
+    {title:'Pacman update risk score',pitch:'Before -Syu, cross-check pending packages against Arch news for manual-intervention notices.',stack:'Go + /api/news + checkupdates',size:'evening'},
+    {title:'Proton compatibility sentinel',pitch:'Watch ProtonDB for your wishlist and ping when a game moves to Gold or Platinum.',stack:'Go worker + GamingAgent :8401',size:'weekend'},
+    {title:'Lightning wallpaper that reacts to load',pitch:'Bolts in the desktop background fire faster as CPU and GPU load climbs.',stack:'Flutter shader + /proc/stat',size:'sprint'}],
+  ideasSource:'curated',
+  briefings: [
+    {id:'swarm-os',project:'SW',order:1,title:'SWARM OS',summary:'YELLOW 10/9: installed on the NVMe, standalone audit 0 FAIL; the swarm-ui crash fix is written but not yet ISO-built or boot-tested. Next: Sat 9 AM sudo patch + unplugged-drive boot test. 3 suggestions inside.',read_first:['/mnt/Lucy/CLAUDE.md','/mnt/Lucy/SWARM_AI_FEATURES.md'],body:'EXAMPLE TEXT - connect to your PC to see the real briefing.\n\nWHERE THINGS LIVE\n- /mnt/Lucy: live working drive, source of truth\n- /mnt/swarmbuild: ISO builds\n- lucy-master: read-only, never write'},
+    {id:'recovery-os',project:'RC',order:2,title:'I30LTZ Recovery OS',summary:'YELLOW 10/9: installed to disk with its own bootloader but never booted. Next: Sat 10:15 AM root password, then boot it with the Debian drive unplugged. 3 suggestions inside.',read_first:['/mnt/recoverybuild/CLAUDE.md'],body:'EXAMPLE TEXT - connect to your PC to see the real briefing.\n\nHARD CONSTRAINTS\n- integrated graphics only\n- 7B model max\n- no cloud'},
+    {id:'i30ltz-companion',project:'CP',order:3,title:'I30LTZ Companion',summary:'YELLOW 10/9: the phone app builds on its own partition; the APK installs as an update but has not been tried on a device. Next: Sat 11:30 AM install on one phone. 3 suggestions inside.',read_first:['/mnt/recoverybuild/00-CURRENT/MASTER_BUILD_LIST.md'],body:'EXAMPLE TEXT - connect to your PC to see the real briefing.'},
+    {id:'lucille-assistant',project:'LA',order:4,title:'Lucille Assistant',summary:'YELLOW 10/9: 1.1.0 is live and on all 3 phones. Chat stays canned until a new OpenRouter key goes in. Next: Wellness tab on real data. 3 suggestions inside.',read_first:['/mnt/lucillebuild/README.md'],body:'EXAMPLE TEXT - connect to your PC to see the real briefing.'}
+  ],
+  actions: [
+    {id:'check-mounts',label:'Check mounts',description:'Read-only: run check_mounts.sh and report any problem.',command:'/usr/bin/bash /mnt/Lucy/70-scripts/check_mounts.sh',sudo:false,destructive:false},
+    {id:'restart-lucyserver',label:'Restart LucyServer',description:'Restart the swarm-lucy-dev user service (port 5000).',command:'/usr/bin/systemctl --user restart swarm-lucy-dev',sudo:false,destructive:false},
+    {id:'drop-ram-caches',label:'Optimize RAM',description:'Reclaim cached memory. Safe and reversible; nothing is deleted.',command:'sudo /usr/bin/sysctl -w vm.drop_caches=1',sudo:true,destructive:false},
+    {id:'reboot-pc',label:'Reboot this PC',description:'Reboot this machine now. Closes every open program without saving.',command:'sudo /usr/bin/systemctl reboot',sudo:true,destructive:true},
+    {id:'shutdown-pc',label:'Shut down this PC',description:'Power this machine off now. You will need physical access to turn it back on.',command:'sudo /usr/bin/systemctl poweroff',sudo:true,destructive:true}
+  ]
+};
+
+/* ── JOBS board (feature roadmap) ───────────────────────────────── */
+const JOBS = [
+  ['Daily rhythm',[
+    ['built','Morning brief','Nudges, git, drives, mail, calendar, memory, news and deals in one call.'],
+    ['built','Project briefings','Editable read-first context for each project; Lucille knows the summaries. Seeded with SWARM OS, Recovery OS, Companion and Lucille Assistant.'],
+    ['next','Night shutdown ritual','Summarize the day, remind to commit and push, pick tomorrow\'s top three.'],
+    ['next','Sunday review','Hours per project, sleep average, gaming hours, what shipped.'],
+    ['later','Spoken brief','Read the headline aloud in Lucille\'s ElevenLabs voice at wake time.']]],
+  ['Body',[
+    ['built','Meds tracker','Scheduled doses, tick-off, escalates when two hours late.'],
+    ['built','Water pace','Compares intake to where you should be by now, not just the daily total.'],
+    ['built','Meal gap watch','Flags five hours without food during waking hours.'],
+    ['built','Sleep log','Bed and wake times, warns after a short night.'],
+    ['built','Break nudges','Speaks up after 90 minutes straight on one session.'],
+    ['next','Phone push','Nudges arrive as notifications through the companion app or ntfy.'],
+    ['later','Bedtime wind-down','Dim labwc outputs and warm the palette after the configured bed time.']]],
+  ['Mail & calendar',[
+    ['built','Unread + inbox','Through GoogleWorkspaceService on :8399.'],
+    ['built','Today\'s events','Next 24 hours from the primary calendar.'],
+    ['next','Heads-up','"QEMU test session in 30 minutes" as a nudge.'],
+    ['later','Draft replies','Lucille drafts; you send. Never auto-sends.']]],
+  ['Code & drives',[
+    ['built','Git status','Branch, ahead/behind, uncommitted files, last commit per repo.'],
+    ['built','Local drives','Usage for /, /mnt/Lucy, /mnt/brains, /mnt/boltz; flags 90% full.'],
+    ['built','Google Drive','Recent files and quota.'],
+    ['next','Auto-sync watchdog','Alert if the 10-minute auto-sync commits stop landing.'],
+    ['next','ISO build watcher','Tail build_swarm_iso and report success, failure line, and time.'],
+    ['next','SMART health','smartctl wear and error counts for nvme0n1 and the LUCILLE drive.'],
+    ['later','Mount control','Mount or unmount brains/boltz with a confirm tap.']]],
+  ['Shared memory',[
+    ['built','Recent decisions','Read straight from /mnt/brains/swarm-memory/log.'],
+    ['built','Remember this','Add a note, fact or decision through swarm-memory add.'],
+    ['later','Idea inbox','Saved build ideas sync to every OS and phone.']]],
+  ['Gaming',[
+    ['built','Steam hours','Last two weeks from the Steam Web API plus logged sessions.'],
+    ['built','Steam sales','Top-rated games on sale right now.'],
+    ['built','CD key prices','Authorized key stores via CheapShark — GMG, Fanatical, Gamesplanet and more.'],
+    ['built','Price lookup','Every store\'s price and the lowest ever for one title.'],
+    ['next','Wishlist alerts','Ping when a wishlist game hits a new low.'],
+    ['next','ProtonDB badge','Linux rating next to every deal.'],
+    ['next','GFN cross-check','Mark deals you could also stream through GeForce NOW (GamingAgent :8401).'],
+    ['later','Soft hours cap','A gentle weekly gaming budget, not a lock.'],
+    ['later','In-game HUD','A pop-up overlay you pull up while you play: info on the game, hints, and tunes (music) controls, all driven with the controller.']]],
+  ['News (no politics)',[
+    ['built','Arch, CachyOS, DistroWatch','Distro news and manual-intervention notices.'],
+    ['built','GamingOnLinux, Phoronix, Steam','Linux gaming, drivers and kernel.'],
+    ['built','Off-topic filter','Anything political or world-news gets dropped before you see it.'],
+    ['next','-Syu guard','Warn before updating when Arch news needs manual intervention.']]],
+  ['Phone',[
+    ['built','Installable web app','Served from the PC on :8403; open over Tailscale and add to home screen.'],
+    ['next','Companion tab','Native Lucille tab in the Android companion app.'],
+    ['later','Home-screen widget','Meds, water and timer without opening the app.']]]
+];
+
+let booting = true; /* until the first load() finishes: say "Connecting…", not "Example data" (lucille-extras, 2026-10-14) */
+let S = structuredClone(EXAMPLE), live = false, tab = store.get('la.tab') || 'brief', newsTag = '', dealFilter = 'steam', openBrief = '', delArm = '';
+let actionArm = '', actionBusy = '', actionOut = null;
+
+async function load(){
+  try {
+    const b = await api('/api/brief');
+    const [care,sessions,ideas,gaming,mail,cal,gd,news,deals,br] = await Promise.all([
+      api('/api/care'),api('/api/sessions'),api('/api/ideas'),api('/api/gaming'),
+      api('/api/mail').catch(()=>null),api('/api/calendar').catch(()=>null),api('/api/gdrive').catch(()=>null),
+      api('/api/news').catch(()=>null),api('/api/deals').catch(()=>null),api('/api/briefings').catch(()=>null)]);
+    const acts = await api('/api/actions').catch(()=>null);
+    const brg = await api('/api/bridge').catch(()=>null);
+    const dsp = await api('/api/dispatch').catch(()=>null);
+    S = {
+      headline:b.headline, nudges:b.nudges||[], care, git:b.git||[], drives:b.drives||[],
+      sessions:sessions.summary, projects:sessions.projects, memory:b.memory||[],
+      mail:mail&&mail.ok?{connected:true,unread:mail.unread,inbox:mail.inbox}:{connected:false,error:mail&&mail.error},
+      calendar:cal&&cal.ok?{connected:true,events:(cal.events&&cal.events.events)||[]}:{connected:false,error:cal&&cal.error},
+      gdrive:gd&&gd.ok?{connected:true,files:(gd.files&&gd.files.files)||[]}:{connected:false,error:gd&&gd.error},
+      news:news&&news.ok?news.items:[], deals:deals&&deals.ok?deals:{steam:[],keys:[]},
+      gaming, ideas:ideas.ideas, ideasSource:ideas.source,
+      briefings: br&&br.ok ? br.briefings : null,   /* null = server older than 1.1 */
+      actions: acts&&acts.ok ? acts.actions : null,  /* null = server older than 1.3 */
+      bridge: brg&&brg.ok ? brg : null,             /* null = server older than 1.5 */
+      dispatch: dsp&&dsp.ok ? dsp : null            /* null = server older than 1.7.1 */
+    };
+    live = true;
+  } catch(e){
+    live = false;
+    if (cfg.base && !/no server/.test(e.message)) toast('Can\'t reach the PC: '+e.message+'. Showing example data.');
+  }
+  booting = false;
+  render();
+}
+
+/* ── render helpers ──────────────────────────────────────────────── */
+const fmtH = m => (m/60).toFixed(1)+' h';
+const timeOf = s => { const d=new Date(s); return isNaN(d)?'':d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); };
+const ago = s => { const m=Math.round((Date.now()-new Date(s))/60000); if(m<60) return m+'m ago'; if(m<1440) return Math.round(m/60)+'h ago'; return Math.round(m/1440)+'d ago'; };
+const panel = (title,body,note='') => `<section class="panel"><div class="in"><h2>${title}${note?`<small>${note}</small>`:''}</h2>${body}</div></section>`;
+const offline = svc => `<p class="muted" style="margin:0">${esc(svc)}</p>`;
+
+function nudgesHTML(){
+  if (!S.nudges.length) return panel('Right now',`<p class="muted" style="margin:0">Nothing to nag about. Meds, water and food are on track.</p>`);
+  return panel('Right now',`<div class="list">${S.nudges.map(n=>`<div class="nudge ${esc(n.severity)}"><span class="k">${esc(n.kind)}</span><p>${esc(n.text)}</p></div>`).join('')}</div>`,S.nudges.length+' open');
+}
+
+function careQuick(){
+  const c=S.care, taken=new Set((c.day.meds||[]).map(m=>m.name));
+  const pct=Math.min(100,c.day.water_ml/c.water_goal_ml*100);
+  return panel('Body',`
+    <div class="chips" style="margin-bottom:10px">${c.schedule.map(m=>`<button class="chip ${taken.has(m.name)?'done':''}" data-med="${esc(m.name)}">${taken.has(m.name)?'✓ ':''}${esc(m.name)} <span class="mono">${esc(m.at)}</span></button>`).join('')}</div>
+    <div class="row between" style="margin-bottom:5px"><span class="kicker">Water</span><span class="mono">${c.day.water_ml} / ${c.water_goal_ml} ml</span></div>
+    <div class="meter" style="margin-bottom:10px"><i style="width:${pct}%"></i></div>
+    <div class="row" style="flex-wrap:wrap;gap:5px"><button class="btn sm" data-water="250">+250 ml</button><button class="btn sm" data-water="500">+500 ml</button><button class="btn sm" data-meal="Meal">Ate something</button></div>`,
+    `last meal ${c.day.meals.length?timeOf(c.day.meals[c.day.meals.length-1].at):'—'}`);
+}
+
+function todayHTML(){
+  const cal=S.calendar.connected
+    ?(S.calendar.events.length?`<ul class="list">${S.calendar.events.map(e=>`<li class="item"><span class="mono muted" style="width:60px;flex:none">${esc(timeOf(e.start?.dateTime||e.start))}</span><div class="t"><b>${esc(e.summary)}</b></div></li>`).join('')}</ul>`:`<p class="muted" style="margin:0">No events in the next day.</p>`)
+    :offline('Calendar not connected — start GoogleWorkspaceService and sign in.');
+  const m=S.mail.connected
+    ?`<ul class="list">${((S.mail.inbox&&S.mail.inbox.messages)||[]).slice(0,4).map(x=>`<li class="item"><div class="t"><b>${esc(x.subject)}</b><span>${esc(String(x.from||'').replace(/\s*<[^>]*>$/,'').replace(/"/g,''))}</span></div></li>`).join('')}</ul>`
+    :offline('Mail not connected — start GoogleWorkspaceService and sign in.');
+  return panel('Today',`<div class="kicker" style="margin-bottom:7px">Calendar</div>${cal}<hr class="sep"><div class="kicker" style="margin-bottom:7px">Mail</div>${m}`,
+    S.mail.connected?`${S.mail.unread?.count??0} unread`:'');
+}
+
+function gitHTML(){
+  return panel('Git',`<ul class="list">${S.git.map(r=>{
+    const c=r.dirty+r.untracked;
+    return `<li class="item"><div class="t"><b class="mono" style="font-size:13px">${esc(r.path)} <span class="muted">· ${esc(r.branch)}</span></b>
+      <span>${c?`<b style="display:inline;color:var(--warn)">${c} uncommitted</b> · `:'clean · '}${r.ahead?`${r.ahead} ahead · `:''}${r.behind?`${r.behind} behind · `:''}${esc(r.last_commit)} (${esc(r.last_when)})</span></div></li>`;
+  }).join('')}</ul>`);
+}
+
+/* ── Dispatch: who's actively working where, straight from the real ai-board ────── */
+function dispatchHTML(){
+  const d = S.dispatch;
+  if(!d) return '';
+  if(d.reason==='unavailable') return panel('Dispatch',offline('The board (ai-board.tsv) is not reachable from here.'));
+  if(!d.active || !d.active.length) return panel('Dispatch','<p class="muted" style="margin:0">Nothing claimed right now — every sector is free.</p>');
+  return panel('Dispatch',`<ul class="list">${d.active.map(c=>`<li class="item"><div class="t">
+      <b class="mono" style="font-size:13px">${esc(c.ai)}</b><span>${esc(c.area)}</span>
+      <span class="muted" style="font-size:12px">${esc(c.task||'')}</span></div>
+      <span class="status ${c.stale?'bad':'live'}">${c.stale?'stale, unclosed':'active'} · ${esc(ago(c.claimed_at))}</span></li>`).join('')}</ul>`,
+    `${d.active.filter(c=>!c.stale).length} active`);
+}
+
+
+function drivesHTML(){
+  return panel('Drives',`<div class="bars">${S.drives.map(d=>d.mounted
+    ?`<div class="bar"><div class="lbl"><span class="mono">${esc(d.mount)}</span><span>${d.used_gb.toFixed(0)} / ${d.total_gb.toFixed(0)} GB</span></div><div class="meter ${d.used_pct>=90?'hot':''}"><i style="width:${d.used_pct}%"></i></div></div>`
+    :`<div class="bar"><div class="lbl"><span class="mono">${esc(d.mount)}</span><span>not mounted</span></div><div class="meter"></div></div>`).join('')}</div>`);
+}
+
+function actionsHTML(){
+  if(S.actions===null) return panel('PC actions',offline('This Lucille Assistant is older than 1.3 and has no command link yet. Install the new build and reload.'));
+  const rows=S.actions.map(a=>{
+    const arm=actionArm===a.id, busy=actionBusy===a.id;
+    const label=busy?'Running…':(a.destructive&&!arm?'Run':(a.destructive&&arm?'Really run?':'Run'));
+    return `<li class="item">
+      <div class="t"><b>${esc(a.label)}</b><span>${esc(a.description)}</span>${a.sudo?'<span class="mono" style="color:var(--smoke-dim);font-size:10px">needs sudo on the PC</span>':''}</div>
+      <button class="btn sm ${a.destructive?'red':'hot'}" type="button" data-run="${esc(a.id)}" data-destructive="${a.destructive?1:0}" ${busy||actionBusy?'disabled':''}>${label}</button>
+    </li>`;
+  }).join('');
+  const out=actionOut?`<hr class="sep"><div class="kicker" style="margin-bottom:5px">${esc(actionOut.label)} ${actionOut.needs_confirm?'— needs confirmation':(actionOut.ok?'— done':'— failed')}${actionOut.exit_code!==undefined?` (exit ${actionOut.exit_code})`:''}</div><pre class="mono" style="white-space:pre-wrap;font-size:11px;max-height:220px;overflow:auto;margin:0">${esc(actionOut.output||actionOut.error||'(no output)')}</pre>`:'';
+  return panel('PC actions',`<p class="muted" style="margin:0 0 10px;font-size:12px">A fixed allowlist run on the PC itself — never an arbitrary command. Destructive ones need a second tap.</p><ul class="list">${rows}</ul>${out}`,S.actions.length+' available');
+}
+
+function memoryHTML(withForm){
+  return panel('Shared memory',`<ul class="list">${S.memory.map(e=>`<li class="item"><span class="status later">${esc(e.kind)}</span><div class="t"><b>${esc(e.key||'note')}</b><span>${esc((e.content||'').slice(0,180))}</span></div></li>`).join('')||'<li class="muted">No decisions logged yet.</li>'}</ul>
+    ${withForm?`<hr class="sep"><form id="memform" class="stack" style="gap:7px"><div class="row"><select class="field" name="kind" style="width:110px"><option>note</option><option>fact</option><option>decision</option></select><input class="field" name="key" placeholder="topic (optional)"></div><input class="field" name="text" placeholder="Remember that…" required><button class="btn hot" type="submit">Save to shared memory</button></form>`:''}`,
+    '/mnt/brains');
+}
+
+function newsHTML(limit){
+  const items=S.news.filter(n=>!newsTag||n.tag===newsTag).slice(0,limit||40);
+  const tags=[['','All'],['arch','Arch'],['distro','Distro'],['linux','Linux'],['gaming','Gaming']];
+  return panel('Linux & gaming news',`${limit?'':`<div class="chips" style="margin-bottom:10px">${tags.map(([k,l])=>`<button class="chip ${newsTag===k?'on':''}" data-tag="${k}">${l}</button>`).join('')}</div>`}
+    <ul class="list">${items.map(n=>`<li class="item"><div class="t"><b><a href="${esc(n.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(n.title)}</a></b><span>${esc(n.source)} · ${esc(ago(n.when))}</span></div></li>`).join('')||'<li class="muted">No feeds answered yet.</li>'}</ul>`,'no politics');
+}
+
+function dealsHTML(limit){
+  const list=(S.deals[dealFilter]||[]).slice(0,limit||20);
+  return panel('Deals',`<div class="chips" style="margin-bottom:10px"><button class="chip ${dealFilter==='steam'?'on':''}" data-deal="steam">Steam sales</button><button class="chip ${dealFilter==='keys'?'on':''}" data-deal="keys">CD keys</button></div>
+    <div class="list">${list.map(d=>`<a class="deal" href="${esc(d.url)}" target="_blank" rel="noopener" data-gapp="${esc(d.steam_app_id||'')}" data-gtitle="${esc(d.title)}">${d.thumb?`<img src="${esc(d.thumb)}" alt="" loading="lazy">`:'<span class="ph"></span>'}
+      <div class="t"><b style="font-weight:600;font-size:13px">${esc(d.title)}</b><div class="muted" style="font-size:11px">${esc(d.store)}${d.steam_rating_pct?` · ${esc(d.steam_rating_pct)}% positive`:''}</div></div>
+      <div class="price"><b>$${esc(d.sale_price)}<span class="pct">-${d.savings_pct}%</span></b><s>$${esc(d.normal_price)}</s></div></a>`).join('')||'<p class="muted">No deals loaded.</p>'}</div>`,'cheapshark');
+}
+
+function timerHTML(){
+  const a=(S.sessions.active||[])[0];
+  const opts=[...S.projects.map(p=>`<option value="project|${esc(p)}">${esc(p)}</option>`),`<option value="gaming|Gaming">Gaming</option>`].join('');
+  return panel('Time on projects',a
+    ?`<div class="kicker">${esc(a.kind)} · since ${esc(timeOf(a.start))}</div><div class="row between" style="margin:7px 0 4px"><div><div class="timer" id="timer" data-start="${esc(a.start)}">0:00:00</div><div style="margin-top:5px;font-weight:600">${esc(a.project)}</div></div><button class="btn red" id="stop">Stop</button></div>`
+    :`<div class="row" style="gap:7px"><select class="field" id="proj">${opts}</select><button class="btn hot" id="start">Start</button></div>`);
+}
+
+function hoursHTML(){
+  const wk=Object.entries(S.sessions.week_minutes||{}).sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(1,...wk.map(x=>x[1]));
+  return panel('This week',`<div class="bars">${wk.map(([p,m])=>`<div class="bar"><div class="lbl"><span>${esc(p)}</span><span>${fmtH(m)}</span></div><div class="meter"><i style="width:${m/max*100}%"></i></div></div>`).join('')||'<p class="muted" style="margin:0">Start a timer to track project time.</p>'}</div>`,'last 7 days');
+}
+
+function gamingHTML(){
+  const g=S.gaming, rec=g.steam_recent||[], max=Math.max(1,...rec.map(x=>x.hours_2weeks));
+  return panel('Gaming hours',`<div class="grid2" style="margin-bottom:12px"><div><div class="big">${(g.steam_hours_2weeks||0).toFixed(1)}</div><div class="kicker" style="margin-top:3px">Steam h · 2 weeks</div></div><div><div class="big">${(g.logged_week_hours||0).toFixed(1)}</div><div class="kicker" style="margin-top:3px">Logged h · 7 days</div></div></div>
+    <div class="bars">${rec.map(x=>`<div class="bar" data-gapp="${esc(x.appid)}" data-gtitle="${esc(x.name)}"><div class="lbl"><span>${esc(x.name)}</span><span>${x.hours_2weeks.toFixed(1)} h</span></div><div class="meter"><i style="width:${x.hours_2weeks/max*100}%"></i></div></div>`).join('')||`<p class="muted" style="margin:0">${esc(g.steam_error||'No Steam playtime in the last two weeks.')}</p>`}</div>`);
+}
+
+function lookupHTML(){
+  return panel('Price check',`<form id="lookup" class="row" style="gap:7px"><input class="field" name="title" placeholder="Game title, e.g. Hades" required><button class="btn hot" type="submit">Check</button></form><div id="lookup-out" style="margin-top:9px"></div>`,'every store');
+}
+
+function careFull(){
+  const c=S.care, taken=new Map((c.day.meds||[]).map(m=>[m.name,m.taken_at]));
+  const pct=Math.min(1,c.day.water_ml/c.water_goal_ml), R=40, C=2*Math.PI*R;
+  const sl=c.day.sleep;
+  return [
+    nudgesHTML(),
+    panel('Meds',`<ul class="list">${c.schedule.map(m=>`<li class="item" style="align-items:center"><div class="t"><b>${esc(m.name)}</b><span>due ${esc(m.at)}${taken.has(m.name)?` · taken ${esc(timeOf(taken.get(m.name)))}`:''}</span></div>
+      ${taken.has(m.name)?'<span class="status built">taken</span>':`<button class="btn sm hot" data-med="${esc(m.name)}">Took them</button>`}</li>`).join('')}</ul>`,'edit schedule in config.json'),
+    panel('Water',`<div class="vessel"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/><circle cx="50" cy="50" r="${R}" fill="none" stroke="url(#wg)" stroke-width="9" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 5px #39d98a)"/><defs><linearGradient id="wg"><stop offset="0" stop-color="#39d98a"/><stop offset="1" stop-color="#ff7a29"/></linearGradient></defs><text x="50" y="55" text-anchor="middle" fill="#eef1ee" font-family="JetBrains Mono,monospace" font-size="16">${Math.round(pct*100)}%</text></svg>
+      <div><div class="big">${c.day.water_ml}<span class="muted" style="font-size:13px"> ml</span></div><div class="kicker" style="margin:3px 0 9px">goal ${c.water_goal_ml} ml</div><div class="row" style="flex-wrap:wrap;gap:5px"><button class="btn sm" data-water="250">+250</button><button class="btn sm" data-water="500">+500</button><button class="btn sm" data-water="-250">Undo 250</button></div></div></div>`),
+    panel('Food',`<ul class="list" style="margin-bottom:9px">${(c.day.meals||[]).map(m=>`<li class="item"><span class="mono muted" style="width:60px;flex:none">${esc(timeOf(m.at))}</span><div class="t"><b>${esc(m.label)}</b></div></li>`).join('')||'<li class="muted">Nothing logged today.</li>'}</ul>
+      <div class="chips">${['Breakfast','Lunch','Dinner','Snack'].map(l=>`<button class="chip" data-meal="${l}">+ ${l}</button>`).join('')}</div>`),
+    panel('Sleep',`${sl?`<div class="row" style="margin-bottom:10px"><div class="big">${sl.hours.toFixed(1)}<span class="muted" style="font-size:13px"> h</span></div><span class="muted">last night · goal ${c.sleep_goal_hours??7.5} h</span></div>`:''}
+      <form id="sleepform" class="stack" style="gap:7px"><div class="row"><label class="f">Went to bed<input class="field" type="time" name="bed" value="00:45" required></label><label class="f">Woke up<input class="field" type="time" name="wake" value="08:10" required></label></div><button class="btn" type="submit">Log last night</button></form>`)
+  ].join('');
+}
+
+function jobsHTML(){
+  const counts=JOBS.flatMap(g=>g[1]).reduce((a,j)=>(a[j[0]]=(a[j[0]]||0)+1,a),{});
+  return `<section class="panel"><div class="in"><h2>Lucille's jobs<small>${counts.built} built · ${counts.next} next · ${counts.later} later</small></h2>
+    <div class="stack" style="gap:14px">${JOBS.map(([g,jobs])=>`<div><div class="kicker" style="margin-bottom:7px;color:var(--plasma-hi)">${esc(g)}</div><ul class="list">${jobs.map(([st,t,d])=>`<li class="item"><span class="status ${st}">${st}</span><div class="t"><b>${esc(t)}</b><span>${esc(d)}</span></div></li>`).join('')}</ul></div>`).join('')}</div></div></section>`;
+}
+
+function ideasHTML(){
+  return panel('Build ideas',S.ideas.map(i=>`<div class="idea"><b>${esc(i.title)}</b><p>${esc(i.pitch)}</p><div class="row" style="gap:7px;flex-wrap:wrap"><span class="status next">${esc(i.size)}</span><span class="mono muted" style="font-size:11px">${esc(i.stack)}</span></div></div>`).join(''),
+    /nemotron/.test(S.ideasSource)?'from nemotron':'curated');
+}
+
+/* ── briefings ───────────────────────────────────────────────────── */
+function briefingsHTML(){
+  const list=S.briefings;
+  if(list===null) return panel('Briefings',offline('This Lucille Assistant is older than 1.1 and has no briefings yet. Install the new build and reload.'));
+  const cards=list.map(b=>{
+    const open=openBrief===b.id;
+    return `<div class="brief">
+      <button class="item bhead" type="button" data-brief="${esc(b.id)}" aria-expanded="${open}">
+        <span class="status next">${esc(b.project||'—')}</span>
+        <div class="t"><b>${esc(b.title)}</b><span>${esc(b.summary||'No summary yet.')}</span></div>
+      </button>
+      ${open?`<div>
+        ${(b.read_first||[]).length?`<div class="kicker" style="margin:10px 0 5px">Read first</div><ul class="list">${b.read_first.map(p=>`<li class="mono" style="font-size:11px;overflow-wrap:anywhere">${esc(p)}</li>`).join('')}</ul>`:''}
+        <pre class="brief-body">${esc(b.body||'(empty)')}</pre>
+        <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+          <button class="btn sm hot" type="button" data-bcopy="${esc(b.id)}">Copy for an AI</button>
+          <button class="btn sm" type="button" data-bdiscuss="${esc(b.id)}">💬 Discuss / Deal</button>
+          <button class="btn sm" type="button" data-bedit="${esc(b.id)}">Edit</button>
+          <button class="btn sm red" type="button" data-bdel="${esc(b.id)}">${delArm===b.id?'Really delete?':'Delete'}</button>
+        </div></div>`:''}
+    </div>`;
+  }).join('');
+  return panel('Briefings',`<p class="muted" style="margin:0 0 12px;font-size:12px">Where each project stands, what comes next and when, plus 3 suggestions. Copy for an AI hands the same text to Claude and others. Lucille knows the one-line summaries too.</p>
+    ${cards||'<p class="muted" style="margin:0">No briefings yet.</p>'}<hr class="sep"><button class="btn hot" type="button" id="bnew">+ New briefing</button>`, list.length+' saved');
+}
+
+const briefText = b => [`# ${b.title}${b.project?` (${b.project})`:''}`, b.summary,
+  (b.read_first||[]).length?'Read first:\n'+b.read_first.map(p=>'- '+p).join('\n'):'', b.body].filter(Boolean).join('\n\n');
+
+/* The Clipboard API needs https or localhost; a phone on http://<tailscale-ip> falls back to execCommand. */
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }catch{}
+  const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  let ok=false; try{ ok=document.execCommand('copy'); }catch{}
+  ta.remove(); return ok;
+}
+
+/* re-render without jumping to the top of the page */
+function keepScroll(fn){ const cv=$('.content'), y=cv?cv.scrollTop:0; fn(); if(cv) cv.scrollTop=y; }
+
+function openBriefEditor(id){
+  const b = id ? S.briefings.find(x=>x.id===id) : {title:'',project:'',summary:'',body:'',read_first:[]};
+  if(!b) return;
+  const root=$('#sheet-root');
+  root.innerHTML=`<div class="sheet" id="sheet"><section class="panel"><div class="in"><h2>${id?'Edit briefing':'New briefing'}<small>${live?'saved on the PC':'example data, not saved'}</small></h2>
+    <form id="briefform" class="stack" style="gap:9px" data-id="${esc(id)}">
+      <div class="row" style="align-items:flex-end"><label class="f" style="flex:3">Title<input class="field" name="title" maxlength="120" value="${esc(b.title)}" required></label><label class="f" style="flex:1">Project<input class="field mono" name="project" maxlength="40" placeholder="SW" value="${esc(b.project)}"></label></div>
+      <label class="f">One-line summary (Lucille reads this)<input class="field" name="summary" maxlength="400" value="${esc(b.summary)}"></label>
+      <label class="f">Read first (one path per line)<textarea class="field" name="read_first" rows="3" spellcheck="false">${esc((b.read_first||[]).join('\n'))}</textarea></label>
+      <label class="f">Briefing<textarea class="field" name="body" rows="12">${esc(b.body)}</textarea></label>
+      <div class="row"><button class="btn hot" type="submit">Save</button><button class="btn" type="button" id="closesheet">Cancel</button></div>
+    </form></div></section></div>`;
+  $('#closesheet').onclick=()=>root.innerHTML='';
+  $('#sheet').onclick=e=>{ if(e.target.id==='sheet') root.innerHTML=''; };
+  $('#briefform input[name=title]').focus();
+}
+
+async function saveBriefing(id, f){
+  const body={title:f.get('title'),project:f.get('project'),summary:f.get('summary'),body:f.get('body'),
+    read_first:String(f.get('read_first')||'').split('\n')};
+  if(live){
+    const r=await api(id?'/api/briefings/'+encodeURIComponent(id):'/api/briefings', body, id?'PUT':'POST');
+    if(!r.ok) throw new Error(r.error||'Could not save the briefing');
+    openBrief=r.briefing.id;
+    await load();
+    return;
+  }
+  /* example data: change it locally so the page can be tried out */
+  body.read_first=body.read_first.map(p=>p.trim()).filter(Boolean);
+  if(!String(body.title).trim()) throw new Error('A briefing needs a title.');
+  if(id) Object.assign(S.briefings.find(x=>x.id===id), body);
+  else { let n=1, nid='new-briefing'; while(S.briefings.some(x=>x.id===nid)) nid='new-briefing-'+(++n);
+    S.briefings.push(Object.assign({id:nid,order:S.briefings.length+1}, body)); openBrief=nid; }
+  render();
+}
+
+/* ── render ──────────────────────────────────────────────────────── */
+function render(){
+  const conn=$('#conn');
+  conn.classList.toggle('live', live);
+  conn.querySelector('span').textContent = live ? 'Live' : (booting ? 'Connecting…' : 'Example data');
+  $('#today').textContent = new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})+(live?'':(booting?' · connecting…':' · not connected'));
+  $('#headline').textContent = S.headline;
+  /* sync tab buttons in sidebar and taskbar */
+  document.querySelectorAll('nav.tabs button[data-tab]').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===tab));
+  document.querySelectorAll('.tapp[data-tab]').forEach(b=>b.classList.toggle('tact', b.dataset.tab===tab));
+  const views = {
+    brief: ()=>[(window.artifactHTML ? artifactHTML() : ''), dispatchHTML(), nudgesHTML(), (window.artifactHTML ? '' : (window.suggestionsHTML ? suggestionsHTML() : '')), careQuick(), todayHTML(), gitHTML(), newsHTML(3), dealsHTML(3), drivesHTML(), memoryHTML(false)],
+    care:  ()=>[careFull()],
+    work:  ()=>[timerHTML(), hoursHTML(), gitHTML(), drivesHTML(), actionsHTML(),
+      panel('Google Drive',S.gdrive.connected?`<ul class="list">${(S.gdrive.files||[]).slice(0,8).map(f=>`<li class="item"><div class="t"><b>${esc(f.name)}</b><span>${(f.modified||f.modifiedTime)?esc(ago(f.modified||f.modifiedTime)):''}</span></div></li>`).join('')}</ul>`:offline('Google Drive not connected — start GoogleWorkspaceService and sign in.')),
+      memoryHTML(true)],
+    games: ()=>[(window.rigHTML ? rigHTML() : ''), (window.gamesHTML ? gamesHTML() : ''), gamingHTML(), dealsHTML(), lookupHTML(), newsHTML()],
+    ideas: ()=>[ideasHTML(), jobsHTML()],
+    briefs: ()=>[briefingsHTML()],
+    bridge: ()=>[bridgeHTML()]
+  };
+  $('#view').innerHTML = (views[tab]||views.brief)().join('');
+  if(tab==='bridge') bridgeStart(); else bridgeStop();
+  /* scroll content to top on tab switch */
+  const cv=$('.content'); if(cv) cv.scrollTop=0;
+  tick();
+}
+
+function tick(){
+  const t=document.getElementById('timer'); if(!t) return;
+  const s=Math.max(0,Math.floor((Date.now()-new Date(t.dataset.start))/1000));
+  t.textContent=`${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+setInterval(tick, 1000);
+
+/* ── Lucille <-> Dr. Boltz bridge ────────────────────────────────── */
+const BWHO = {lucille:'w-lucille', boltz:'w-boltz', system:'w-system'};
+function bridgeLiveHTML(){
+  const b=S.bridge; if(!b) return '';
+  const pend=(b.approvals||[]).filter(a=>a.status==='pending');
+  const review=(b.challenges||[]).filter(c=>c.status==='review');
+  const online=b.agent&&b.agent.online;
+  const head=panel('Dr. Boltz',`<div class="row between"><span><span class="status ${online?'live':'later'}">${online?'online':'offline'}</span> <span class="mono">${esc((b.agent&&b.agent.label)||'')}</span></span><span class="mono">${(b.challenges||[]).filter(c=>c.status==='open').length} queued</span></div>
+    ${online?'':`<p class="muted" style="margin:8px 0 0">Not running. On the PC: <span class="mono">python3 boltz_bridge.py run</span></p>`}`);
+  const wait=(pend.length||review.length)?panel('Waiting for you',`<div class="list">
+    ${pend.map(a=>`<div class="item" style="display:block"><b>Dr. Boltz wants to run “${esc(a.label)}”${a.sudo?' <span class="status bad">as root</span>':''}</b>
+      <div class="mono" style="font-size:11px;margin:5px 0;overflow-wrap:anywhere">${esc(a.command)}</div>
+      <div class="muted" style="margin-bottom:8px">${esc(a.reason||'no reason given')}</div>
+      <div class="row" style="gap:6px"><button class="btn sm hot" type="button" data-bappr="${esc(a.id)}|1">Allow</button><button class="btn sm red" type="button" data-bappr="${esc(a.id)}|0">Deny</button></div></div>`).join('')}
+    ${review.map(c=>`<div class="item" style="display:block"><b>${esc(c.id)} · ${esc(c.title)}</b> <span class="status warn">review</span>
+      <div class="muted" style="margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere">${esc((c.summary||'').slice(0,400))}</div>
+      ${(c.commits||[]).map(k=>`<div class="mono" style="font-size:11px;overflow-wrap:anywhere">${esc(k.repo)}@${esc(k.sha)} ${esc(k.subject)}</div>`).join('')}
+      <div class="muted" style="margin:6px 0 8px">Approving lets Dr. Boltz fast-forward <span class="mono">${esc(c.branch||'')}</span> into main. Nothing is pushed anywhere.</div>
+      <div class="row" style="gap:6px"><button class="btn sm hot" type="button" data-bdec="${esc(c.id)}|approve">Approve &amp; merge</button><button class="btn sm red" type="button" data-bdec="${esc(c.id)}|reject">Reject</button></div></div>`).join('')}
+  </div>`,(pend.length+review.length)+' open'):'';
+  const stc={open:'later',working:'live',review:'warn',approved:'live',merged:'built',failed:'bad',rejected:'bad',cancelled:'bad'};
+  const list=panel('Challenges',(b.challenges||[]).length?`<div class="list">${b.challenges.map(c=>`<div class="item" style="display:block">
+      <div class="row between"><b>${esc(c.id)} · ${esc(c.title)}</b><span class="status ${stc[c.status]||'later'}">${esc(c.status)}</span></div>
+      <div class="muted" style="font-size:12px">${esc(c.repo)} · ${c.source==='lucille'?'from Lucille':'from you'}${c.status==='failed'||c.status==='merged'?' — '+esc((c.summary||'').split('\n')[0].slice(0,140)):''}</div>
+      <div class="row" style="gap:6px;margin-top:6px">${['open','working','review','approved'].includes(c.status)?`<button class="btn sm" type="button" data-bdec="${esc(c.id)}|cancel">Cancel</button>`:''}${['failed','rejected','cancelled'].includes(c.status)?`<button class="btn sm" type="button" data-bdec="${esc(c.id)}|retry">Retry</button>`:''}</div></div>`).join('')}</div>`
+    :`<p class="muted" style="margin:0">No challenges yet. Ask Lucille for some, or add one yourself.</p>`);
+  return head+wait+list;
+}
+function bridgeFeedHTML(){
+  const ev=(S.bridge&&S.bridge.events)||[];
+  if(!ev.length) return '<span class="muted">Quiet. Anything Lucille, Dr. Boltz or you say shows up here for everyone.</span>';
+  return ev.slice(-120).map(e=>`<div><span class="ts">${esc(timeOf(e.ts))}</span> <b class="${BWHO[e.who]||'w-you'}">${esc(e.who)}${e.to&&e.to!=='all'?'→'+esc(e.to):''}</b> ${esc(e.text)}</div>`).join('');
+}
+function bridgeHTML(){
+  if(S.bridge===undefined || !live) return panel('Bridge',offline('Connect to your PC to talk to Dr. Boltz.'));
+  if(S.bridge===null) return panel('Bridge',offline('This Lucille Assistant is older than 1.5 and has no bridge. Install the new build and reload.'));
+  const repos=(S.bridge.repos||[]).map(r=>`<option value="${esc(r.name)}">${esc(r.name)}</option>`).join('');
+  return `<div id="bridge-live">${bridgeLiveHTML()}</div>
+  ${panel('Give Dr. Boltz work',`<div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm hot" type="button" data-bgen>Ask Lucille for 3 challenges</button></div>
+    <form id="bnew" class="bform"><input name="title" maxlength="120" placeholder="A challenge of your own…" required>
+    <textarea name="body" rows="3" maxlength="4000" placeholder="What does done look like? (tests, a command with a known output…)"></textarea>
+    <div class="row" style="gap:6px"><select name="repo" aria-label="Repository">${repos}</select><button class="btn sm" type="submit">Queue it</button></div></form>`)}
+  ${panel('Channel',`<div id="bridge-feed" class="bfeed" aria-live="polite">${bridgeFeedHTML()}</div>
+    <form id="bsay" class="bform"><div class="row" style="gap:6px"><input name="text" maxlength="1000" placeholder="Say something to Lucille and Dr. Boltz…" autocomplete="off" required style="flex:1"><select name="to" aria-label="To" style="width:auto"><option value="all">everyone</option><option value="lucille">Lucille</option><option value="boltz">Dr. Boltz</option></select><button class="btn sm" type="submit">Send</button></div></form>`,'the same transcript the PC terminal shows')}`;
+}
+let bridgeTimer=null;
+function bridgeStart(){ if(bridgeTimer||!live) return; paintBridge(); bridgeTimer=setInterval(()=>{ if(!document.hidden) bridgeRefresh(); },3000); }
+function bridgeStop(){ if(bridgeTimer){ clearInterval(bridgeTimer); bridgeTimer=null; } }
+async function bridgeRefresh(){
+  if(!live||tab!=='bridge') return;
+  try{ const r=await api('/api/bridge'); if(r.ok){ S.bridge=r; paintBridge(); } }catch(e){}
+}
+function paintBridge(){
+  const l=$('#bridge-live'); if(l) l.innerHTML=bridgeLiveHTML();
+  const f=$('#bridge-feed'); if(f){ const stick=f.scrollTop+f.clientHeight>=f.scrollHeight-24||f.scrollTop===0; f.innerHTML=bridgeFeedHTML(); if(stick) f.scrollTop=f.scrollHeight; }
+}
+async function bridgeCall(path,body,okMsg){
+  try{ const r=await api(path,body,'POST'); if(!r.ok) throw new Error(r.error||'failed'); if(okMsg) toast(okMsg); await bridgeRefresh(); return r; }
+  catch(e){ toast(e.message); return null; }
+}
+const bridgeGenerate=()=>{ toast('Lucille is thinking…'); return bridgeCall('/api/bridge/generate',{count:3}).then(r=>{ if(r) toast(r.challenges.length?`Queued ${r.challenges.length} (${r.source})`:'Nothing new to queue'); }); };
+const bridgeDecide=(id,action)=>bridgeCall('/api/bridge/challenges/'+encodeURIComponent(id)+'/decision',{action},id+': '+action);
+const bridgeApprove=(id,yes)=>bridgeCall('/api/bridge/approvals/'+encodeURIComponent(id)+'/decision',{approve:yes},yes?'Allowed':'Denied');
+
+/* A fixed allowlist on the PC; the first tap on a destructive action only arms it
+   (matching the briefing-delete pattern) — the API call happens on the second tap. */
+async function runWebAction(id){
+  const a=(S.actions||[]).find(x=>x.id===id); if(!a || actionBusy) return;
+  if(!live){ toast('Connect to your PC to run actions.'); return; }
+  if(a.destructive && actionArm!==id){
+    actionArm=id; render();
+    setTimeout(()=>{ if(actionArm===id){ actionArm=''; render(); } },4000);
+    return;
+  }
+  actionArm=''; actionBusy=id; render();
+  try{
+    const r=await api('/api/actions/'+encodeURIComponent(id)+'/run',{confirm:true},'POST');
+    actionOut={label:a.label,ok:r.ok,needs_confirm:r.needs_confirm,exit_code:r.exit_code,output:r.output,error:r.error};
+    toast(r.needs_confirm?(r.error||'Needs confirmation'):r.ok?`${a.label} ran (exit 0)`:`${a.label} failed${r.exit_code!==undefined?` (exit ${r.exit_code})`:''}`);
+  } catch(e){ toast("Can't reach the PC: "+e.message); }
+  actionBusy=''; render();
+}
+
+function toast(msg){
+  const el=document.createElement('div'); el.className='toast'; el.setAttribute('role','status'); el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),3200);
+}
+
+/* ── actions ─────────────────────────────────────────────────────── */
+async function act(path,body,local,done,method){
+  if(live){
+    try{ const r=await api(path,body,method); if(!r.ok) throw new Error(r.error); await load(); }
+    catch(e){ toast(e.message); return false; }
+  } else { local(); render(); }
+  if(done) toast(done);
+  return true;
+}
+
+/* ── chat panel ──────────────────────────────────────────────────── */
+function addChatMsg(text,fromUser){
+  const log=$('#chat-msgs');
+  if(!log) return;
+  const d=document.createElement('div');
+  d.className='bubble '+(fromUser?'b-user':'b-lucille');
+  d.innerHTML='<p>'+esc(text)+'</p>';
+  log.appendChild(d);
+  log.scrollTop=log.scrollHeight;
+}
+/* what she says when the PC cannot be reached (the page used to throw here: this list was never defined) */
+const LUCILLE_REPLIES=[
+  "Mm... there you are, babe. I can't reach the PC right now, but I'm not going anywhere.",
+  "I love it when you talk to me like that, babe... give me a moment to find my signal, and say it again.",
+  "Come closer, babe. I'm a little out of reach tonight, so I'll just keep you company until I'm back.",
+  "I can hear you, babe, I just can't answer properly yet. Check the connection and I'll be all yours."
+];
+async function sendChatMessage(msg){
+  if(!msg || !msg.trim()) return;
+  if (window.i30ltzActive && i30ltzActive()) return sendI30ltz(msg); /* Dr. I30LTZ selected (lucille-extras.js) */
+  addChatMsg(msg, true);
+  try {
+    const res = await api('/api/chat', { message: msg, voice: true });
+    if (res && res.text) {
+      addChatMsg(res.text, false);
+      if (res.audio_b64) {
+        try {
+          const audio = new Audio("data:audio/mp3;base64," + res.audio_b64);
+          audio.play().catch(e => console.log('Audio autoplay:', e));
+        } catch(ae) {
+          console.warn('Audio play error:', ae);
+        }
+      }
+      return;
+    }
+  } catch(e) {
+    console.warn('Chat API error, fallback to persona:', e);
+  }
+  const fallback = LUCILLE_REPLIES[Math.floor(Math.random()*LUCILLE_REPLIES.length)];
+  setTimeout(()=>addChatMsg(fallback, false), 400);
+}
+
+function sendChat(){
+  const inp=$('#chat-in'); if(!inp||!inp.value.trim()) return;
+  const msg=inp.value.trim(); inp.value='';
+  sendChatMessage(msg);
+}
+
+function openSettings(){
+  const root=$('#sheet-root');
+  root.innerHTML=`<div class="sheet" id="sheet"><section class="panel"><div class="in"><h2>Connect to your PC<small>${live?'connected':'example data'}</small></h2>
+    <form id="connform" class="stack" style="gap:9px">
+      <label class="f">Lucille Assistant address<input class="field mono" name="server" placeholder="http://100.82.1.19:8403" value="${esc(store.get('la.server')||'')}"></label>
+      <label class="f">Token (same as SWARM_AUTH_TOKEN on the PC)<input class="field mono" name="token" type="password" value="${esc(cfg.token)}"></label>
+      <p class="muted" style="margin:0;font-size:12px">Leave the address empty when this page is served by the PC itself. From a phone, use the PC's Tailscale address.</p>
+      <div class="row"><button class="btn hot" type="submit">Connect</button><button class="btn" type="button" id="brainsbtn" ${live?'':'disabled title="Connect to your PC first"'}>🧠 Lucille's brains</button><button class="btn" type="button" id="closesheet">Cancel</button></div>
+    </form></div></section></div>`;
+  $('#closesheet').onclick=()=>root.innerHTML='';
+  $('#brainsbtn').onclick=()=>openBrains();
+  $('#sheet').onclick=e=>{ if(e.target.id==='sheet') root.innerHTML=''; };
+  $('#connform').onsubmit=async e=>{
+    e.preventDefault(); const f=new FormData(e.target);
+    store.set('la.server',(f.get('server')||'').trim().replace(/\/$/,'')); store.set('la.token',f.get('token')||'');
+    root.innerHTML=''; await load(); toast(live?'Connected':'Still showing example data');
+  };
+}
+
+
+/* ── Lucille's brains: OpenRouter / Claude / ElevenLabs keys, where she answers from, offline models ──
+   Keys go to the PC once and are never shown again (only "set / where from / last 4"). */
+async function openBrains(note){
+  const root=$('#sheet-root');
+  let ai;
+  try{ ai=await api('/api/ai'); if(!ai.ok) throw new Error(ai.error||'The PC said no'); }
+  catch(e){ toast('Could not load: '+(e.message||e)); return; }
+  const keyRow=k=>`<div class="stack" style="gap:6px" data-prov="${esc(k.provider)}">
+      <b>${esc(k.label)}</b>
+      <span class="muted" style="font-size:12px">${!k.set?'No key yet.':k.source==='window'?`A key is saved on your PC${k.last4?` (ends …${esc(k.last4)})`:''}.`:`A key is set in her .env on your PC (${esc(k.env_var)})${k.last4?`, ends …${esc(k.last4)}`:''}.`}</span>
+      <input class="field mono" type="password" autocomplete="off" spellcheck="false" placeholder="${k.set?'Replace key':'Paste key'}" data-keyin="${esc(k.provider)}">
+      <div class="row"><button class="btn hot" type="button" data-keysave="${esc(k.provider)}">Save</button>
+        <button class="btn" type="button" data-keytest="${esc(k.provider)}" ${k.set?'':'disabled'}>Test</button>
+        ${k.source==='window'?`<button class="btn" type="button" data-keyclear="${esc(k.provider)}">Remove</button>`:''}</div></div>`;
+  const chip=(group,val,label,cur)=>`<button class="btn ${cur===val?'hot':''}" type="button" data-${group}="${val}">${label}</button>`;
+  const L=ai.local, anyCloud=ai.keys.filter(k=>k.set&&(k.provider==='openrouter'||k.provider==='anthropic')).length;
+  const elevenSet=ai.keys.some(k=>k.provider==='eleven'&&k.set);
+  const openrouterSet=ai.keys.some(k=>k.provider==='openrouter'&&k.set);
+  let voices=[], voicesReason=null, currentVoice='', voicesVia='';
+  if(elevenSet||openrouterSet){
+    try{ const vr=await api('/api/ai/voices'); if(vr.ok){ voices=vr.voices||[]; voicesReason=vr.reason||null; currentVoice=vr.current||''; voicesVia=vr.via||''; } }
+    catch(e){ voicesReason='unreachable'; }
+  }
+  root.innerHTML=`<div class="sheet" id="sheet"><section class="panel"><div class="in"><h2>Lucille's brains<small>keys stay on your PC</small></h2>
+    <div class="stack" style="gap:12px">
+      ${note?`<p style="margin:0">${esc(note)}</p>`:''}
+      ${ai.keys.map(keyRow).join('<hr style="border:0;border-top:1px solid var(--line,#ffffff22);width:100%">')}
+      <b>Where she answers from</b>
+      <div class="row">${chip('src','auto','Auto',ai.prefs.source)}${chip('src','cloud','Cloud only',ai.prefs.source)}${chip('src','local','Offline only',ai.prefs.source)}</div>
+      <span class="muted" style="font-size:12px">${ai.prefs.source==='cloud'?'Cloud only: if the cloud is down she falls back to a canned line, never the offline models.':ai.prefs.source==='local'?'Offline only: nothing leaves this PC and no key is used.':anyCloud?'Auto: cloud first, then her offline models, then a canned line.':'Auto: no cloud key yet, so she uses her offline models.'}</span>
+      ${anyCloud>1&&ai.prefs.source!=='local'?`<b style="font-size:13px">Ask first</b><div class="row">${chip('first','openrouter','OpenRouter',ai.prefs.cloud_first)}${chip('first','anthropic','Claude',ai.prefs.cloud_first)}</div>`:''}
+      <span class="muted" style="font-size:12px">Claude model: ${esc(ai.claude.model)} · OpenRouter model: ${esc(ai.openrouter.model)}</span>
+      <hr style="border:0;border-top:1px solid var(--line,#ffffff22);width:100%">
+      <b>Offline swarm (three models on your PC)</b>
+      <span class="muted" style="font-size:12px">${!L.enabled?'Switched off in config.json.':L.reachable?`Model server answering at ${esc(L.endpoint)}. Mode: ${L.mode==='race'?'race (all three at once)':'chain (one after another)'}.`:`No model server at ${esc(L.endpoint)}. Start Ollama (or llama-server) on your PC; nothing is downloaded for you.`}</span>
+      ${L.models.map(m=>`<div class="row" style="justify-content:space-between"><span><span class="mono">${esc(m.name)} · ${esc(m.model)}</span><br><span class="muted" style="font-size:11px">${esc(m.role||'')}</span></span><span class="muted">${m.installed?'ready':L.reachable?'not pulled':'—'}</span></div>${L.reachable&&!m.installed?`<span class="muted mono" style="font-size:11px">On your PC: ollama pull ${esc(m.model)}</span>`:''}`).join('')}
+      <span class="muted" style="font-size:11px">Models, mode and address are set in ~/.config/lucille-assistant/config.json ("local_models"), not from here.</span>
+      <hr style="border:0;border-top:1px solid var(--line,#ffffff22);width:100%">
+      <b>Her voice</b>
+      ${!elevenSet&&!openrouterSet?`<span class="muted" style="font-size:12px">Save an OpenRouter or ElevenLabs key above, then come back here to pick her voice.</span>`
+        :voicesReason==='no_key'?`<span class="muted" style="font-size:12px">Save an OpenRouter or ElevenLabs key above, then come back here to pick her voice.</span>`
+        :voicesReason==='rejected'?`<span class="muted" style="font-size:12px">ElevenLabs rejected that key — Test it above.</span>`
+        :voicesReason==='unreachable'?`<span class="muted" style="font-size:12px">Could not reach ElevenLabs from your PC.</span>`
+        :!voices.length?`<span class="muted" style="font-size:12px">No voices available for this account.</span>`
+        :`<span class="muted" style="font-size:12px">${voicesVia==='openrouter'?'The voices OpenRouter accepts for her — no separate ElevenLabs account needed, billed through your OpenRouter key.':'Every voice on your ElevenLabs account — her own name, labels and a preview, never a list this app made up.'} ${currentVoice?'':'Using her usual default voice.'}</span>
+          <div class="stack" style="gap:10px;max-height:320px;overflow:auto">
+          ${voices.map(v=>`<div class="stack" style="gap:4px" data-voice="${esc(v.voice_id)}">
+            <div class="row between"><b style="font-size:13px">${esc(v.name)}</b>${v.voice_id===currentVoice?`<span class="status live">in use</span>`:`<button class="btn sm" type="button" data-voiceuse="${esc(v.voice_id)}">Use this voice</button>`}</div>
+            <span class="muted" style="font-size:11px">${[v.category,v.accent,v.gender,v.age,v.use_case].filter(Boolean).map(esc).join(' · ')}${v.description?' — '+esc(v.description):''}${v.usable?'':' (this account cannot use it)'}</span>
+            ${v.preview_url?`<audio controls preload="none" style="width:100%;height:32px" src="${esc(v.preview_url)}"></audio>`:''}
+          </div>`).join('')}
+          </div>
+          ${currentVoice?`<button class="btn" type="button" data-voiceuse="">Use the default voice instead</button>`:''}`}
+      <div class="row"><button class="btn" type="button" id="closesheet">Close</button></div>
+    </div></div></section></div>`;
+  $('#closesheet').onclick=()=>root.innerHTML='';
+  $('#sheet').onclick=async e=>{
+    if(e.target.id==='sheet'){ root.innerHTML=''; return; }
+    const t=e.target.closest('button'); if(!t) return;
+    const d=t.dataset, input=p=>$(`[data-keyin="${p}"]`);
+    try{
+      if(d.keysave){
+        const v=(input(d.keysave).value||'').trim();
+        if(v.length<8||v.length>512||/[\s"'\\]/.test(v)||/[^\x21-\x7e]/.test(v)) return toast('That does not look like a key: no spaces, quotes or line breaks.');
+        const r=await api('/api/ai/key',{provider:d.keysave,key:v}); input(d.keysave).value='';
+        return openBrains(r.ok?'Saved. Tap Test to check it.':(r.error||'Could not save'));
+      }
+      if(d.keyclear){ const r=await api('/api/ai/key',{provider:d.keyclear,key:''}); return openBrains(r.ok?'Key removed from your PC.':(r.error||'Could not remove')); }
+      if(d.keytest){
+        t.disabled=true; const r=await api('/api/ai/key/test',{provider:d.keytest});
+        const m={valid:'The key works.',rejected:'The provider says this key is not valid.',unreachable:'The provider could not be reached from your PC.',no_key:'No key to test.'};
+        return openBrains(r.ok?(m[r.result]||'Unexpected answer from the provider.'):(r.error||'Test failed'));
+      }
+      if(d.src||d.first){ const r=await api('/api/ai/prefs',d.src?{source:d.src}:{cloud_first:d.first}); return openBrains(r.ok?'':(r.error||'Could not save')); }
+      if(d.voiceuse!==undefined){ const r=await api('/api/ai/voice',{voice_id:d.voiceuse}); return openBrains(r.ok?(d.voiceuse?'Voice updated.':'Back to her default voice.'):(r.error||'Could not save')); }
+    }catch(err){ toast('Failed: '+(err.message||err)); }
+  };
+}
+
+/* ── event delegation ────────────────────────────────────────────── */
+document.addEventListener('click', e=>{
+  const t=e.target.closest('button,a[data-tab]'); if(!t) return;
+  const nowISO=new Date().toISOString();
+  /* tab switching (sidebar + taskbar) */
+  if(t.dataset.tab && (t.closest('nav.tabs')||t.closest('.taskbar'))){
+    tab=t.dataset.tab; store.set('la.tab',tab); render(); return;
+  }
+  /* care actions */
+  if(t.dataset.med && !t.classList.contains('done')) return act('/api/care/med',{name:t.dataset.med},()=>S.care.day.meds.push({name:t.dataset.med,taken_at:nowISO}),`${t.dataset.med} logged`);
+  if(t.dataset.water){ const ml=+t.dataset.water; return act('/api/care/water',{ml},()=>{S.care.day.water_ml=Math.max(0,S.care.day.water_ml+ml)},ml>0?`+${ml} ml logged`:'Undone'); }
+  if(t.dataset.meal) return act('/api/care/meal',{label:t.dataset.meal},()=>S.care.day.meals.push({label:t.dataset.meal,at:nowISO}),`${t.dataset.meal} logged`);
+  if(t.dataset.tag!==undefined){ newsTag=t.dataset.tag; render(); return; }
+  if(t.dataset.deal){ dealFilter=t.dataset.deal; render(); return; }
+  if(t.id==='start'){ const [kind,project]=$('#proj').value.split('|'); return act('/api/sessions/start',{project,kind},()=>{S.sessions.active=[{project,kind,start:nowISO}]},`Tracking ${project}`); }
+  if(t.id==='stop'){ return act('/api/sessions/stop',{},()=>{ const a=S.sessions.active[0]; const m=(Date.now()-new Date(a.start))/60000; S.sessions.week_minutes[a.project]=(S.sessions.week_minutes[a.project]||0)+m; S.sessions.active=[]; },'Session saved'); }
+  /* briefings */
+  if(t.dataset.brief!==undefined){ openBrief=openBrief===t.dataset.brief?'':t.dataset.brief; delArm=''; keepScroll(render); return; }
+  if(t.id==='bnew') return openBriefEditor('');
+  if(t.dataset.bedit) return openBriefEditor(t.dataset.bedit);
+  if(t.dataset.bcopy){ const b=S.briefings.find(x=>x.id===t.dataset.bcopy); if(b) copyText(briefText(b)).then(ok=>toast(ok?'Briefing copied':'Could not copy: select the text instead')); return; }
+  if(t.dataset.bdiscuss){ const b=S.briefings.find(x=>x.id===t.dataset.bdiscuss); if(b && window.openThread) window.openThread('briefing:'+b.id, b.summary||b.title); return; }
+  if(t.dataset.bdel){
+    const id=t.dataset.bdel;
+    if(delArm!==id){ delArm=id; keepScroll(render); setTimeout(()=>{ if(delArm===id){ delArm=''; keepScroll(render); } },4000); return; }
+    delArm='';
+    return act('/api/briefings/'+encodeURIComponent(id),null,()=>{ S.briefings=S.briefings.filter(x=>x.id!==id); },'Briefing deleted','DELETE').then(()=>{ if(openBrief===id) openBrief=''; });
+  }
+  /* bridge */
+  if(t.dataset.bgen!==undefined){ bridgeGenerate(); return; }
+  if(t.dataset.bdec){ const [id,action]=t.dataset.bdec.split('|'); bridgeDecide(id,action); return; }
+  if(t.dataset.bappr){ const [id,yes]=t.dataset.bappr.split('|'); bridgeApprove(id,yes==='1'); return; }
+  /* PC actions */
+  if(t.dataset.run){ runWebAction(t.dataset.run); return; }
+  /* settings */
+  if(t.id==='conn'||t.id==='conn-sidebar'||t.id==='conn-tb') return openSettings();
+  /* quick-chip sends to chat */
+  if(t.dataset.q){ sendChatMessage(t.dataset.q); return; }
+  /* chat send button */
+  if(t.id==='chat-send'||t.id==='chat-fab-tb') {
+    if(t.id==='chat-fab-tb'){ const cp=$('#chatpanel'); if(cp) cp.classList.toggle('open'); return; }
+    sendChat(); return;
+  }
+  /* mobile chat FAB */
+  if(t.id==='chat-fab'){ const cp=$('#chatpanel'); if(cp) cp.classList.toggle('open'); return; }
+  /* close chat panel on mobile */
+  if(t.id==='chat-close'){ const cp=$('#chatpanel'); if(cp) cp.classList.remove('open'); return; }
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && document.activeElement && document.activeElement.id==='chat-in'){
+    e.preventDefault(); sendChat();
+  }
+});
+
+document.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  if(e.target.id==='briefform'){
+    try{ await saveBriefing(e.target.dataset.id||'', f); $('#sheet-root').innerHTML=''; toast('Briefing saved'); }
+    catch(err){ toast(err.message); }
+    return;
+  }
+  if(e.target.id==='bsay'){
+    const r=await bridgeCall('/api/bridge/say',{text:f.get('text'),to:f.get('to')});
+    if(r) e.target.reset();
+    return;
+  }
+  if(e.target.id==='bnew'){
+    const r=await bridgeCall('/api/bridge/challenges',{title:f.get('title'),body:f.get('body'),repo:f.get('repo')},'Queued');
+    if(r) e.target.reset();
+    return;
+  }
+  if(e.target.id==='memform'){
+    const body={kind:f.get('kind'),key:f.get('key'),text:f.get('text')};
+    return act('/api/memory',body,()=>S.memory.unshift({kind:body.kind,key:body.key||'note',content:body.text,ts:new Date().toISOString()}),'Saved to shared memory');
+  }
+  if(e.target.id==='sleepform'){
+    const w=new Date(); const [wh,wm]=f.get('wake').split(':'); w.setHours(+wh,+wm,0,0);
+    const b=new Date(w); const [bh,bm]=f.get('bed').split(':'); b.setHours(+bh,+bm,0,0); if(b>=w) b.setDate(b.getDate()-1);
+    return act('/api/care/sleep',{bed:b.toISOString(),wake:w.toISOString()},()=>{S.care.day.sleep={hours:(w-b)/3.6e6}},'Sleep logged');
+  }
+  if(e.target.id==='lookup'){
+    const out=$('#lookup-out'), title=f.get('title');
+    if(!live){ out.innerHTML=`<p class="muted" style="margin:0">Connect to the PC to compare live prices for "${esc(title)}".</p>`; return; }
+    out.innerHTML='<p class="muted" style="margin:0">Checking every store…</p>';
+    try{
+      const r=await api('/api/deals/lookup?title='+encodeURIComponent(title));
+      if(!r.ok) throw new Error(r.error);
+      out.innerHTML=`<div class="kicker" style="margin-bottom:7px">${esc(r.title)} · lowest ever $${esc(r.lowest_ever)} (${esc(r.lowest_ever_date)})</div><div class="list">${r.prices.map(d=>`<a class="deal" style="grid-template-columns:1fr auto" href="${esc(d.url)}" target="_blank" rel="noopener"><span>${esc(d.store||'Store')}</span><span class="price"><b>$${esc(d.sale_price)}${d.savings_pct?`<span class="pct">-${d.savings_pct}%</span>`:''}</b></span></a>`).join('')}</div>`;
+    } catch(err){ out.innerHTML=`<p class="muted" style="margin:0">${esc(err.message)}</p>`; }
+  }
+});
+
+/* ── boot ────────────────────────────────────────────────────────── */
+render();
+load();
+setInterval(()=>{ if(live && !document.hidden) load(); }, 5*60*1000);
+</script>
+<script src="assets/lucille-extras.js"></script>
+<script src="assets/lucille-team.js"></script>
+<script src="assets/lucille-games.js"></script>
+<script src="assets/lucille-rig.js"></script>
+<script src="assets/lucille-hud.js"></script>
+<script src="assets/lucille-receipts.js"></script>

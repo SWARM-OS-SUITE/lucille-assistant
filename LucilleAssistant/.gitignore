@@ -1,0 +1,14 @@
+/lucille-assistant
+/build/
+/dist/
+.gradle/
+.kotlin/
+**/build/
+local.properties
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+.claude/
+.idea/caches/

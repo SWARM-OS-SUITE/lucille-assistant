@@ -1,0 +1,17 @@
+# User unit for the standalone Lucille Assistant install (written by install.sh;
+# @PREFIX@ and @ENVFILE@ are filled in). No path outside the install is used.
+[Unit]
+Description=Lucille Assistant (daily brief, care, gaming, news) on :8403
+After=network-online.target
+
+[Service]
+EnvironmentFile=-@ENVFILE@
+# Listens on loopback only unless ~/.config/lucille-assistant/config.json says otherwise.
+# To reach it from a phone over Tailscale add LUCILLE_ASSISTANT_LISTEN="127.0.0.1:8403;<tailscale-ip>:8403"
+# to the env file AND set SWARM_AUTH_TOKEN there (non-loopback API calls are refused without it).
+ExecStart=@PREFIX@/lucille-assistant
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

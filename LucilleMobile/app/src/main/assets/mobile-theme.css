@@ -1,0 +1,46 @@
+/* Lucille Mobile look: clean and professional. Injected over the shared web
+   page by MainActivity (the desktop page and the Assistant app keep their
+   own orange/green style). One accent (indigo), calm dark slate, rounded
+   corners instead of chamfered ones, system sans instead of the ornate serif.
+   Lucille's own background image stays, just darker so text stays crisp. */
+:root{
+  --void:#0b0e14; --void-2:#10141b;
+  --plasma:#7c8cff; --plasma-hi:#a8b3ff;
+  --arc:#5eead4; --ember:#f87171;
+  --filament:#e6e9f0; --smoke:#9aa4b2; --smoke-dim:#4b5563;
+  --ok:#4ade80; --warn:#fbbf24; --crit:#f87171;
+  --panel-fill:rgba(14,18,25,.90);
+  --panel-border:rgba(255,255,255,.09);
+  --edge:linear-gradient(135deg,rgba(124,140,255,.40),rgba(255,255,255,.06) 55%,rgba(124,140,255,.10));
+  --display:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --cut:0px;
+}
+.scene::after{background:linear-gradient(to bottom,rgba(8,11,16,.38) 0%,rgba(8,11,16,.58) 45%,rgba(8,11,16,.86) 100%)}
+.panel,.panel>.in,.conn,.send-btn,.btn{clip-path:none!important}
+.panel{border-radius:12px}
+.panel>.in{border-radius:11px}
+.conn,.send-btn,.btn{border-radius:8px}
+h2{letter-spacing:.08em}
+.conn:hover{background:rgba(124,140,255,.18)}
+.chat-input:focus{border-color:var(--plasma);box-shadow:0 0 0 2px rgba(124,140,255,.20)}
+.btn{background:rgba(124,140,255,.16)}
+.btn:hover{background:rgba(124,140,255,.30)}
+.btn.hot{background:linear-gradient(135deg,var(--plasma),#5a67d8);box-shadow:none}
+.nudge.critical{background:rgba(248,113,113,.08)}
+.nudge.critical .k{color:#fca5a5}
+.bfeed .w-lucille{color:#b4bcff}
+/* leftover hard-coded orange in the shared page */
+.avatar-img{box-shadow:0 0 0 2px rgba(124,140,255,.55),0 0 14px rgba(124,140,255,.25)}
+.nav-brand-img{box-shadow:0 0 0 2px rgba(124,140,255,.5),0 0 10px rgba(124,140,255,.22)}
+nav.tabs button[aria-selected="true"]{background:rgba(124,140,255,.13)}
+nav.tabs button:hover:not([aria-selected="true"]){background:rgba(124,140,255,.07)}
+.content::-webkit-scrollbar-thumb{background:rgba(124,140,255,.3)}
+.qchip:hover{background:rgba(124,140,255,.22)}
+.tapp:hover,.tapp.tact{background:rgba(124,140,255,.13)}
+hr.sep{background:linear-gradient(90deg,transparent,rgba(124,140,255,.4),transparent)}
+.chip.on{background:rgba(124,140,255,.24)}
+.idea,.brief{border-top-color:rgba(255,255,255,.08)}
+input.field,select.field,textarea.field,.bform input,.bform textarea,.bform select{border-color:rgba(255,255,255,.16);border-radius:8px}
+input.field:focus,select.field:focus,textarea.field:focus{box-shadow:0 0 0 2px rgba(124,140,255,.22)}
+.timer{text-shadow:none}
